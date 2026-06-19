@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨音Cafe Pomodoro Timer</title>
+<style>
+  /* ===== フォント：丸みのあるゴシック ===== */
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
+
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+  body { background: transparent; }
+
+  /* 背景モード（JSが body に class を付与） */
+  body.bg-green  { background: #00FF00; }
+  body.bg-blue   { background: #0000FF; }
+  body.bg-checker{
+    background-color: #cfd8dc;
+    background-image:
+      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%),
+      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%);
+    background-size: 48px 48px;
+    background-position: 0 0, 24px 24px;
+  }
+
+  #stage{
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    /* 出現/消滅で stage 全体を制御 */
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #stage.show{ opacity: 1; }
+
+  /* ===== 時刻表示 MM:SS ===== */
+  #time{
+    font-size: 168px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 4px;
+    line-height: 1;
+    /* やわらかい影。透過/クロマで色被りしないよう控えめ＆白系 */
+    text-shadow:
+      0 4px 18px rgba(120, 170, 200, 0.35),
+      0 1px 2px rgba(255, 255, 255, 0.6);
+    font-variant-numeric: tabular-nums;
+    /* 出現時の“にじみ出る”用 */
+    filter: blur(0px);
+  }
+
+  /* ラベル（集中 / 休憩） */
+  #label{
+    margin-top: 10px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 8px;
+    opacity: 0.92;
+    text-shadow: 0 2px 8px rgba(120,170,200,0.35);
+  }
+
+  /* ===== 進捗ゲージ（4分割・水が溜まる） ===== */
+  #gauge{
+    position: relative;
+    margin-top: 46px;
+    width: 560px;
+    height: 26px;
+    display: flex;
+    gap: 8px;
+  }
+  .seg{
+    position: relative;
+    flex: 1;
+    height: 100%;
+    border-radius: 13px;
+    background: rgba(255,255,255,0.28);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.55);
+  }
+  /* 各セグメントの“水”。height ではなく width で左→右に満ちる */
+  .seg .fill{
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 100%);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  /* 水面のゆらぎ */
+  .seg .fill::after{
+    content:""; position:absolute; top:-2px; right:-6px; width:12px; height:130%;
+    background: rgba(255,255,255,0.55);
+    border-radius: 50%;
+    filter: blur(2px);
+    animation: ripple 1.6s ease-in-out infinite;
+  }
+  @keyframes ripple{
+    0%,100%{ transform: translateY(0) scaleY(1); opacity:.5; }
+    50%    { transform: translateY(2px) scaleY(.9); opacity:.85; }
+  }
+
+  /* 出現演出：水滴＋波紋 */
+  #drop{
+    position:absolute; left:50%; top:-60px; transform:translateX(-50%);
+    width:16px; height:16px; border-radius:50% 50% 50% 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, var(--accent-light));
+    opacity:0;
+  }
+  #ripple-ring{
+    position:absolute; left:50%; top:50%;
+    width:10px; height:10px; border-radius:50%;
+    border:3px solid var(--accent-light);
+    transform: translate(-50%,-50%) scale(0);
+    opacity:0;
+  }
+</style>
+</head>
+<body>
+  <div id="ripple-ring"></div>
+  <div id="stage">
+    <div id="drop"></div>
+    <div id="time">25:00</div>
+    <div id="label">集中</div>
+    <div id="gauge">
+      <div class="seg"><div class="fill"></div></div>
+      <div class="seg"><div class="fill"></div></div>
+      <div class="seg"><div class="fill"></div></div>
+      <div class="seg"><div class="fill"></div></div>
+    </div>
+  </div>
+
+<script>
+/* =================================================================
+   雨音Cafe ポモドーロタイマー — パラメータ（ここだけ触れば量産可）
+   ================================================================= */
+const CONFIG = {
+  workMin:    25,         // 集中の分数（既定25）。50/10 等に変えるだけで派生可
+  breakMin:   5,          // 休憩の分数（連結モードで使用）
+  sets:       1,          // 連結モード時のセット数。1なら1セッションのみ
+  chainMode:  false,      // true: work→break→work… を連続再生（長尺用）
+  accentColor:'#7ec8e3',  // アクセント（ごく薄い水色）
+  bgMode:     'checker',  // 'alpha' | 'green' | 'blue' | 'checker'(確認用)
+  introWaitSec: 5,        // 出現後の待機（カウント開始まで）
+  outroWaitSec: 5,        // 00:00 後の待機（消えるまで）
+  introSec:   1.6,        // 出現演出の尺
+  outroSec:   1.6,        // 消滅演出の尺
+  labelWork:  '集中',
+  labelBreak: '休憩',
+};
+
+/* ---- URLパラメータで一時上書き（確認用・量産時は不要） ----
+   例: timer.html?workMin=1&bgMode=checker  → 1分版で素早くプレビュー   */
+(function(){
+  const q = new URLSearchParams(location.search);
+  for(const [k,v] of q){
+    if(!(k in CONFIG)) continue;
+    if(typeof CONFIG[k]==='number') CONFIG[k]=Number(v);
+    else if(typeof CONFIG[k]==='boolean') CONFIG[k]=(v==='true'||v==='1');
+    else CONFIG[k]=v;
+  }
+})();
+
+/* ---- アクセント色の派生（薄色・グロー） ---- */
+function hexToRgb(h){ const n=parseInt(h.slice(1),16); return [n>>16&255,n>>8&255,n&255]; }
+function rgba(c,a){ const [r,g,b]=hexToRgb(c); return `rgba(${r},${g},${b},${a})`; }
+function lighten(h,amt){ const [r,g,b]=hexToRgb(h);
+  const f=v=>Math.round(v+(255-v)*amt).toString(16).padStart(2,'0');
+  return `#${f(r)}${f(g)}${f(b)}`; }
+
+document.documentElement.style.setProperty('--accent', CONFIG.accentColor);
+document.documentElement.style.setProperty('--accent-light', lighten(CONFIG.accentColor,0.5));
+document.documentElement.style.setProperty('--accent-glow', rgba(CONFIG.accentColor,0.6));
+
+/* ---- 背景モード ---- */
+document.body.className = ({alpha:'', green:'bg-green', blue:'bg-blue', checker:'bg-checker'})[CONFIG.bgMode] || '';
+
+/* ---- 要素参照 ---- */
+const $stage = document.getElementById('stage');
+const $time  = document.getElementById('time');
+const $label = document.getElementById('label');
+const $fills = [...document.querySelectorAll('.seg .fill')];
+const $drop  = document.getElementById('drop');
+const $ring  = document.getElementById('ripple-ring');
+
+const SEG = $fills.length; // 4分割
+
+function fmt(sec){
+  sec = Math.max(0, Math.ceil(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+/* セグメント進捗（0..1）を 4本のバーに振り分け（左から水が満ちる） */
+function setProgress(p){
+  p = Math.min(1, Math.max(0, p));
+  for(let i=0;i<SEG;i++){
+    const lo=i/SEG, hi=(i+1)/SEG;
+    const local = (p<=lo)?0 : (p>=hi)?1 : (p-lo)/(hi-lo);
+    $fills[i].style.width = (local*100).toFixed(2)+'%';
+  }
+}
+
+/* easing */
+const easeOut = t => 1-Math.pow(1-t,3);
+
+/* ===== 出現演出：水滴が落ちて波紋→数字がにじみ出る ===== */
+function playIntro(){
+  return new Promise(res=>{
+    const D = CONFIG.introSec*1000;
+    // 水滴落下
+    $drop.animate(
+      [ {top:'-60px',opacity:0,offset:0},
+        {top:'-60px',opacity:1,offset:0.15},
+        {top:'calc(50% - 20px)',opacity:1,offset:0.55},
+        {top:'calc(50% - 8px)',opacity:0,offset:0.62} ],
+      {duration:D,easing:'cubic-bezier(.4,0,.7,1)',fill:'forwards'}
+    );
+    // 波紋
+    $ring.animate(
+      [ {transform:'translate(-50%,-50%) scale(0)',opacity:0,offset:0},
+        {transform:'translate(-50%,-50%) scale(0)',opacity:0,offset:0.55},
+        {transform:'translate(-50%,-50%) scale(1)',opacity:0.9,offset:0.62},
+        {transform:'translate(-50%,-50%) scale(22)',opacity:0,offset:1} ],
+      {duration:D,easing:'ease-out',fill:'forwards'}
+    );
+    // 数字＆ゲージがにじみ出る（ブラー→クリア＋フェード）
+    setTimeout(()=>{
+      $stage.classList.add('show');
+      $time.animate(
+        [ {filter:'blur(14px)',transform:'translateY(6px)',opacity:0},
+          {filter:'blur(0px)',transform:'translateY(0)',opacity:1} ],
+        {duration:D*0.5,easing:'ease-out',fill:'forwards'}
+      );
+    }, D*0.55);
+    setTimeout(res, D);
+  });
+}
+
+/* ===== 消滅演出：水に溶けて滲んで消える ===== */
+function playOutro(){
+  return new Promise(res=>{
+    const D = CONFIG.outroSec*1000;
+    $time.animate(
+      [ {filter:'blur(0px)',opacity:1,transform:'translateY(0) scale(1)'},
+        {filter:'blur(16px)',opacity:0,transform:'translateY(10px) scale(1.04)'} ],
+      {duration:D,easing:'ease-in',fill:'forwards'}
+    );
+    $stage.style.transition = `opacity ${D}ms ease-in`;
+    requestAnimationFrame(()=> $stage.classList.remove('show'));
+    setTimeout(res, D);
+  });
+}
+
+/* ===== 1フェーズのカウントダウン（work or break） ===== */
+function runCountdown(totalSec, label){
+  return new Promise(res=>{
+    $label.textContent = label;
+    const start = performance.now();
+    function tick(now){
+      const elapsed = (now-start)/1000;
+      const remain  = totalSec - elapsed;
+      $time.textContent = fmt(remain);
+      setProgress(elapsed/totalSec);
+      if(remain > 0){ requestAnimationFrame(tick); }
+      else { $time.textContent='00:00'; setProgress(1); res(); }
+    }
+    // 初期表示
+    $time.textContent = fmt(totalSec); setProgress(0);
+    requestAnimationFrame(tick);
+  });
+}
+
+const wait = s => new Promise(r=>setTimeout(r, s*1000));
+
+/* ===== シーケンス ===== */
+async function main(){
+  // 初期表示の数字をworkに合わせる
+  $time.textContent = fmt(CONFIG.workMin*60);
+  $label.textContent = CONFIG.labelWork;
+
+  await playIntro();
+  await wait(CONFIG.introWaitSec);          // 出現後 5秒待機
+
+  if(!CONFIG.chainMode){
+    await runCountdown(CONFIG.workMin*60, CONFIG.labelWork);
+  } else {
+    for(let i=0;i<CONFIG.sets;i++){
+      await runCountdown(CONFIG.workMin*60, CONFIG.labelWork);
+      if(i < CONFIG.sets-1){
+        await runCountdown(CONFIG.breakMin*60, CONFIG.labelBreak);
+      }
+    }
+  }
+
+  await wait(CONFIG.outroWaitSec);          // 00:00 後 5秒待機
+  await playOutro();
+
+  // 書き出しツール用の完了マーカー（puppeteerが検知してキャプチャ終了）
+  window.__TIMER_DONE__ = true;
+  document.title = 'DONE';
+}
+main();
+</script>
+</body>
+</html>

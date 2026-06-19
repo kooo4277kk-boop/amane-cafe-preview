@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨音Cafe White Cat Walk Loop</title>
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; }
+  body { background: transparent; }
+
+  /* 背景モード（JSが body に class を付与）。timer.html と同じ作法 */
+  body.bg-green  { background:#00FF00; }
+  body.bg-blue   { background:#0000FF; }
+  body.bg-checker{
+    background-color:#cfd8dc;
+    background-image:
+      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%),
+      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%);
+    background-size:48px 48px;
+    background-position:0 0, 24px 24px;
+  }
+
+  #stage{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  /* キャンバスは固定サイズ（書き出し前提）。JSが幅高を設定 */
+  #scene{ display:block; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="scene"></canvas>
+  </div>
+
+<script>
+/* =================================================================
+   雨音Cafe 白猫 歩行ループ — パラメータ（ここだけ触れば調整可）
+   timer.html と同じ設計：上の CONFIG を変えるだけ。
+   ================================================================= */
+const CONFIG = {
+  /* --- キャンバス（書き出し用に固定） --- */
+  canvasW:   1080,        // 出力幅(px)。横長にするなら 1920 等
+  canvasH:   1080,        // 出力高(px)
+
+  /* --- 猫 --- */
+  size:      1.0,         // 猫の大きさ倍率（1.0=基準。1.4で約1.4倍）
+  walkSpeed: 1.2,         // 1歩行サイクルの秒数。小さいほど速い
+  tailSwing: 1.0,         // 尻尾の揺れ幅の倍率（0=揺れない / 1.5=大きく揺れる）
+
+  /* --- 足跡（肉球） --- */
+  pawPrints: true,        // 肉球の足跡を残すか
+  pawFade:   0.85,        // 足跡が消えるまでの時間（サイクル比 0..1）。<1でループ前に消滅
+  pawSize:   1.0,         // 肉球の大きさ倍率
+
+  /* --- 背景 --- */
+  bgMode:    'checker',   // 'alpha' | 'green' | 'blue' | 'checker'(確認用)
+
+  /* --- ループ設定 --- */
+  loops:     2,           // 表示するループ回数（プレビュー用。書き出しは1ループ抽出）
+};
+
+/* ---- URLパラメータで一時上書き（確認用） ----
+   例: cat_walk_loop.html?bgMode=green&walkSpeed=0.8&size=1.3        */
+(function(){
+  const q = new URLSearchParams(location.search);
+  for(const [k,v] of q){
+    if(!(k in CONFIG)) continue;
+    if(typeof CONFIG[k]==='number') CONFIG[k]=Number(v);
+    else if(typeof CONFIG[k]==='boolean') CONFIG[k]=(v==='true'||v==='1');
+    else CONFIG[k]=v;
+  }
+})();
+
+/* ---- 1ループの秒数（= walkSpeed）。書き出しツールが参照可能に ---- */
+window.__LOOP_SEC__ = CONFIG.walkSpeed;
+console.log('[cat_walk_loop] 1 loop =', CONFIG.walkSpeed, 'sec');
+
+/* ---- 背景モード ---- */
+document.body.className = ({alpha:'', green:'bg-green', blue:'bg-blue', checker:'bg-checker'})[CONFIG.bgMode] || '';
+
+/* =================================================================
+   描画準備
+   ================================================================= */
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const DPR = window.devicePixelRatio || 1;
+
+canvas.style.width  = CONFIG.canvasW + 'px';
+canvas.style.height = CONFIG.canvasH + 'px';
+canvas.width  = Math.round(CONFIG.canvasW * DPR);
+canvas.height = Math.round(CONFIG.canvasH * DPR);
+ctx.scale(DPR, DPR);
+
+const W = CONFIG.canvasW, H = CONFIG.canvasH;
+
+/* ---- 猫の基準スケール。キャンバスに対して相対 ---- */
+const BASE = Math.min(W, H) / 520;     // 520pxキャンバス基準で設計
+const S = BASE * CONFIG.size;          // 最終スケール
+const GROUND = H * 0.60;               // 地面のy（足先が着く高さ）。猫はこの上に立つ
+const CX = W * 0.5;                    // 猫の中心x（その場で歩く＝固定）
+
+const TAU = Math.PI * 2;
+
+/* =================================================================
+   歩行サイクル
+   位相 phase ∈ [0,1) が完全ループ。先頭=末尾で連続。
+   脚は対角ペアで動かす（自然なトロット風）。
+   ================================================================= */
+
+/* =================================================================
+   猫のジオメトリ定数（ローカル座標：原点=地面、+x=前進方向）
+   すべての脚・胴・頭・尻尾・足跡がこの定数を共有 → 接地ズレを防ぐ。
+   ================================================================= */
+const G = {
+  legLen:    62,   // 脚の長さ（付け根→足先）。長めで猫らしく
+  hipX:     -42,   // 後脚の付け根x（お尻寄り）
+  shoulderX: 40,   // 前脚の付け根x（肩寄り）
+  bodyTopY: -118,  // 背中のおおよその高さ（足先=0 基準）
+  stride:    20,   // 歩幅（前後の踏み出し量）
+  lift:      26,   // 遊脚で足を持ち上げる高さ
+};
+
+/* ---- 1本の脚の状態を返す。off=位相オフセット ----
+   立脚期：足は地面(y=0)に着き後方へ流れる。
+   遊脚期：足が持ち上がり前方へ戻る。完全ループ。              */
+function legState(phase, off){
+  const p = (phase + off) % 1;
+  // 前後位置：sinで滑らかに前後（接地点は概ね立脚期の後半で後方）
+  const x = -Math.sin(p * TAU) * G.stride;
+  // 持ち上げ：p∈[0,0.5)が遊脚期＝浮く、[0.5,1)が立脚期＝接地(0)
+  const swing = (p < 0.5);
+  const lift  = swing ? Math.sin(p * TAU) * G.lift : 0;
+  return { x, lift, grounded: !swing };
+}
+
+/* =================================================================
+   足跡（肉球）の管理
+   現在phaseから決定論的に算出 → 配列に溜めない＝無限蓄積しない。
+   pawFade<1 なので1サイクル内で必ず消える＝ループを汚さない。
+   足跡は「その脚が接地し始めた地点」に置く。
+   ================================================================= */
+// 各脚 off ごとに：接地開始phase = (0.5 - off + 1)%1。着地点x = rootX。
+const FOOT_DROPS = [
+  { off: 0.00, rootX: G.hipX,      hind:true  },  // LH
+  { off: 0.25, rootX: G.shoulderX, hind:false },  // LF
+  { off: 0.50, rootX: G.hipX,      hind:true  },  // RH
+  { off: 0.75, rootX: G.shoulderX, hind:false },  // RF
+].map(d => ({ ...d, at: ((0.5 - d.off) % 1 + 1) % 1 }));
+
+/* 肉球を描く（地面に残る足跡）。透過OK。yは地面=GROUND基準 */
+function drawPaw(x, scale, alpha, hind){
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#FFFFFF';
+  const r = 6 * S * CONFIG.pawSize * scale;
+  const y = GROUND + 6 * S; // ほんの少し地面側
+  // 手のひら（メインパッド）
+  ctx.beginPath();
+  ctx.ellipse(x, y, r*1.2, r*0.85, 0, 0, TAU);
+  ctx.fill();
+  // 指（前足4・後足3）。猫の足跡らしく上側に並ぶ
+  const toes = hind ? 3 : 4;
+  for(let i=0;i<toes;i++){
+    const t = (i - (toes-1)/2);
+    ctx.beginPath();
+    ctx.ellipse(x + t*r*0.7, y - r*1.15, r*0.36, r*0.46, 0, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPawPrints(phase){
+  if(!CONFIG.pawPrints) return;
+  for(const d of FOOT_DROPS){
+    let age = phase - d.at;
+    if(age < 0) age += 1;                 // 0..1（着地からの経過）
+    if(age > CONFIG.pawFade) continue;    // 既に消えた
+    const k = age / CONFIG.pawFade;       // 0(着地)→1(消滅)
+    const alpha = (1 - k) * 0.55;         // フェードアウト
+    const scale = 1 + k * 0.3;            // 少し広がりながら消える
+    // 接地地点x：着地点(rootX)からstride分だけ後方へ流れた位置に固定
+    const x = CX + (d.rootX - G.stride) * S;
+    drawPaw(x, scale, alpha, d.hind);
+  }
+}
+
+/* =================================================================
+   1本の脚を描く（付け根→膝→足先のテーパー）。
+   ローカル座標：原点=地面、付け根は (rootX, -legLen)。
+   ================================================================= */
+function drawLeg(rootX, off, depth){
+  const st = legState(phase_, off);
+  const footX = rootX + st.x;
+  const footY = -st.lift;                 // 0=地面
+  const topY  = -G.legLen;                // 付け根の高さ
+  ctx.save();
+  ctx.globalAlpha = depth;
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  // 太もも幅で塗る：付け根=太い、足先=細い 2点ストローク風
+  ctx.lineWidth = 13;
+  const kneeX = rootX + st.x*0.45;
+  const kneeY = topY*0.42 - st.lift*0.25; // 膝（中間でやや前/上）
+  ctx.beginPath();
+  ctx.moveTo(rootX, topY);
+  ctx.quadraticCurveTo(kneeX, kneeY, footX, footY);
+  ctx.stroke();
+  // 足先（肉球）。接地時は地面ライン(+6)まで届かせる
+  const toeY = st.grounded ? 4 : footY;
+  ctx.beginPath();
+  ctx.ellipse(footX, toeY, 7, 5, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+let phase_ = 0; // drawLeg がアクセスする現在位相（drawCat冒頭で設定）
+
+/* =================================================================
+   猫本体（白シルエット）。横向き・右を向いて歩く。顔/模様なし。
+   ================================================================= */
+function drawCat(phase){
+  phase_ = phase;
+  ctx.save();
+  ctx.translate(CX, GROUND);   // 原点を地面へ
+  ctx.scale(S, S);
+  ctx.fillStyle = '#FFFFFF';
+
+  // 体の上下バウンド（歩行リズム。2倍周期で軽く）
+  const bob = -Math.abs(Math.sin(phase * TAU)) * 5;
+  ctx.translate(0, bob);
+
+  /* ---- 4本足の歩行（ラテラルシーケンス：LH→LF→RH→RF を1/4ずつずらす） ----
+     奥=左、手前=右 とし、奥脚ペアを先に（背後に）描く                    */
+  drawLeg(G.hipX,      0.00, 0.72);   // 奥の後脚 LH
+  drawLeg(G.shoulderX, 0.25, 0.72);   // 奥の前脚 LF
+
+  /* ---- 尻尾（お尻から後上方へ。S字でゆらゆら。体より奥） ---- */
+  ctx.save();
+  ctx.translate(G.hipX - 14, -G.legLen - 30);  // お尻の付け根
+  const sw = CONFIG.tailSwing;
+  ctx.fillStyle = '#FFFFFF';
+  // 関節をたどり、太→細にテーパー。位相ずらしでうねり＝完全ループ
+  const NSEG = 6;
+  let px = 0, py = 0;
+  let ang = Math.PI * 0.78;          // 後ろ上向きスタート（左=後方）
+  const pts = [{x:0, y:0, w:8}];
+  for(let i=0;i<NSEG;i++){
+    const wob = Math.sin(phase*TAU - i*0.7) * (0.16 + i*0.05) * sw;
+    ang += wob - 0.02;               // 全体は後方へ伸びつつ反る
+    const len = 17 * (1 - i*0.06);
+    px += Math.cos(ang) * len;
+    py -= Math.sin(ang) * len;
+    pts.push({x:px, y:py, w: 8 - i*1.15});
+  }
+  // テーパー輪郭（上辺→下辺）
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y - pts[0].w);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y - pts[i].w);
+  for(let i=pts.length-1;i>=0;i--) ctx.lineTo(pts[i].x, pts[i].y + pts[i].w);
+  ctx.closePath();
+  ctx.fill();
+  const tip = pts[pts.length-1];
+  ctx.beginPath(); ctx.arc(tip.x, tip.y, Math.max(1.5, tip.w), 0, TAU); ctx.fill();
+  ctx.restore();
+
+  /* ---- 胴体（背中のアーチ＋丸いお尻＋胸） ---- */
+  const T = -G.legLen;   // 脚付け根の高さ（胴の底あたり）
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  // お尻（後上）→背中のアーチ→肩
+  ctx.moveTo(G.hipX - 18, T - 30);                              // お尻の上
+  ctx.bezierCurveTo(G.hipX - 4, T - 52,  10, T - 56,  G.shoulderX + 6, T - 46); // 背中アーチ
+  ctx.bezierCurveTo(G.shoulderX + 22, T - 42, G.shoulderX + 30, T - 34, G.shoulderX + 30, T - 24); // 肩→胸前
+  // 胸→前脚付け根→お腹（少しタックアップ）→後脚付け根→お尻下
+  ctx.bezierCurveTo(G.shoulderX + 30, T - 12, G.shoulderX + 16, T - 8, G.shoulderX, T - 8);
+  ctx.bezierCurveTo(10, T - 4, G.hipX + 24, T - 6, G.hipX + 10, T - 14);        // お腹（持ち上がり）
+  ctx.bezierCurveTo(G.hipX - 2, T - 18, G.hipX - 16, T - 18, G.hipX - 20, T - 28);
+  ctx.closePath();
+  ctx.fill();
+
+  /* ---- 頭（横顔：丸頭＋耳2つ＋やや突き出た鼻先。ディテールなし） ---- */
+  ctx.save();
+  // 肩の前上に配置。歩行に合わせ微かに上下
+  ctx.translate(G.shoulderX + 30, T - 44 + Math.sin(phase*TAU)*1.5);
+  ctx.fillStyle = '#FFFFFF';
+  // 首〜頬をつなぐ塊
+  ctx.beginPath();
+  ctx.ellipse(2, 6, 17, 15, 0, 0, TAU);   // 頬・首の付け根
+  ctx.fill();
+  // 丸い頭
+  ctx.beginPath();
+  ctx.arc(8, -4, 17, 0, TAU);
+  ctx.fill();
+  // 鼻先（前下にちょこっと）
+  ctx.beginPath();
+  ctx.ellipse(22, 2, 8, 6.5, -0.15, 0, TAU);
+  ctx.fill();
+  // 耳（三角2つ：手前・奥）
+  ctx.beginPath();
+  ctx.moveTo(-2,-14); ctx.lineTo(-8,-34); ctx.lineTo(8,-20); ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(10,-15); ctx.lineTo(16,-35); ctx.lineTo(24,-16); ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  /* ---- 手前側の脚ペア（くっきり。体の上に重ねる） ---- */
+  drawLeg(G.hipX,      0.50, 1.0);    // 手前の後脚 RH
+  drawLeg(G.shoulderX, 0.75, 1.0);    // 手前の前脚 RF
+
+  ctx.restore();
+}
+
+/* =================================================================
+   メインループ。phase は performance.now から導出＝シームレス。
+   ================================================================= */
+function frame(now){
+  // 背景クリア（透過維持）
+  ctx.clearRect(0, 0, W, H);
+
+  const t = now / 1000;
+  const phase = (t / CONFIG.walkSpeed) % 1;   // 0..1 完全ループ
+
+  drawPawPrints(phase);   // 地面の足跡（猫の下＝先に描く）
+  drawCat(phase);         // 猫本体
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* 書き出しツール用：1ループ秒数とキャンバスサイズを公開 */
+window.__CAT_META__ = { loopSec: CONFIG.walkSpeed, w: CONFIG.canvasW, h: CONFIG.canvasH };
+window.CONFIG = CONFIG; // 検証ツールから位相を固定するため公開
+</script>
+</body>
+</html>
