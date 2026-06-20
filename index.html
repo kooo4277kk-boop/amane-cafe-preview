@@ -14,7 +14,7 @@
     padding:32px 18px 60px;
   }
   h1{ font-size:24px; font-weight:800; margin:18px 0 4px; }
-  .sub{ font-size:13px; opacity:.7; margin-bottom:26px; }
+  .sub{ font-size:13px; opacity:.7; margin-bottom:26px; text-align:center; }
   .card{
     width:100%; max-width:460px; background:#fff; border-radius:22px;
     padding:20px 20px 18px; margin-bottom:18px;
@@ -29,99 +29,44 @@
     background:linear-gradient(180deg,#9ad3e8,#6bb8d6);
     box-shadow:0 3px 10px rgba(107,184,214,.4);
   }
-  a.btn.alt{ background:linear-gradient(180deg,#cdb89a,#b59770); box-shadow:0 3px 10px rgba(181,151,112,.4); }
   a.btn.ghost{ background:#eef4f7; color:#5a8298; box-shadow:none; }
   .tag{ display:inline-block; font-size:11px; background:#eaf4f8; color:#5a8298; padding:3px 9px; border-radius:9px; margin-bottom:8px; }
-  .note{ font-size:12px; opacity:.6; max-width:460px; text-align:center; margin-top:10px; line-height:1.6; }
+  .frame{
+    width:100%; aspect-ratio:9/12; border:0; border-radius:16px; display:block;
+    background-color:#c4d2d8;
+    background-image:
+      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%),
+      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%);
+    background-size:40px 40px; background-position:0 0,20px 20px;
+  }
+  .wip{ font-size:13px; opacity:.6; padding:10px 0; }
+  .note{ font-size:12px; opacity:.6; max-width:460px; text-align:center; margin-top:6px; line-height:1.6; }
 </style>
 </head>
 <body>
   <h1>雨音Cafe 素材プレビュー</h1>
-  <div class="sub">スマホで確認用 / by リン</div>
+  <div class="sub">まだ決まってない素材だけ載せてるよ / by リン<br>（決まったやつは素材フォルダへ卒業）</div>
 
   <div class="card">
-    <span class="tag">①ポモドーロタイマー</span>
-    <h2>25分タイマー</h2>
-    <p>水滴が落ちて数字がにじみ出る→25分カウント→水に溶けて消える。下に4分割の水ゲージ。</p>
-    <div class="btns">
-      <a class="btn" href="timer/timer.html?workMin=1&bgMode=checker">▶ 1分版で素早く見る</a>
-      <a class="btn ghost" href="timer/timer.html?bgMode=checker">25分フル</a>
-      <a class="btn ghost" href="timer/timer.html?bgMode=green">緑クロマ確認</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <span class="tag">②白猫アニメ（動画できた！）</span>
-    <h2>白猫の歩行ループ — 3案くらべ</h2>
-    <p>白猫シルエットを動画化。緑は背景キー用なので本番でKEIが消すよ。脚が歩いて尻尾も揺れる。GrokとMidjourneyで作ったよ、好きなの選んで！（Veoはアカウントに動画機能が無くて今回スキップ）</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <figure style="margin:0;flex:1;min-width:120px;">
-        <video src="cat/generated/cat_walk_grok_01.mp4" autoplay loop muted playsinline
-          style="width:100%;border-radius:14px;background:#3aa53a;display:block;"></video>
-        <figcaption style="font-size:12px;text-align:center;margin-top:6px;opacity:.75;">A：Grok（元気め）</figcaption>
-      </figure>
-      <figure style="margin:0;flex:1;min-width:120px;">
-        <video src="cat/generated/cat_walk_grok_02.mp4" autoplay loop muted playsinline
-          style="width:100%;border-radius:14px;background:#3aa53a;display:block;"></video>
-        <figcaption style="font-size:12px;text-align:center;margin-top:6px;opacity:.75;">B：Grok（ゆっくり）</figcaption>
-      </figure>
-      <figure style="margin:0;flex:1;min-width:120px;">
-        <video src="cat/generated/cat_walk_mj_01.mp4" autoplay loop muted playsinline
-          style="width:100%;border-radius:14px;background:#3aa53a;display:block;"></video>
-        <figcaption style="font-size:12px;text-align:center;margin-top:6px;opacity:.75;">C：Midjourney</figcaption>
-      </figure>
-    </div>
+    <span class="tag">①25分タイマー（新デザイン・確定したい）</span>
+    <h2>FOCUS タイマー</h2>
+    <p>水滴がポタッ→波紋がポワーン→FOCUSと数字がにじみ出て5秒後スタート。数字の下に長いゲージ1本＋4つの丸（今のセットがゆっくり点滅）。Three.jsでリッチにしたよ。読み込むと演出が再生される（もう一回見たいリロードしてね）。</p>
+    <iframe class="frame" src="timer/timer.html?bgMode=checker&set=2&demo=80" title="focus timer"></iframe>
     <div class="btns" style="margin-top:12px;">
-      <a class="btn ghost" href="cat/generated/cat_walk_grok_01.mp4">A単体</a>
-      <a class="btn ghost" href="cat/generated/cat_walk_grok_02.mp4">B単体</a>
-      <a class="btn ghost" href="cat/generated/cat_walk_mj_01.mp4">C単体</a>
+      <a class="btn" href="timer/timer.html?bgMode=checker&set=1" target="_blank">▶ 大きく見る（実速・25分）</a>
+      <a class="btn ghost" href="timer/timer.html?bgMode=checker&set=2&demo=60" target="_blank">早送りで全体を見る</a>
+      <a class="btn ghost" href="timer/timer.html?bgMode=green&set=1" target="_blank">緑クロマ確認</a>
     </div>
-    <p style="font-size:12px;opacity:.6;margin-top:10px;">Midjourneyは他に3パターン（mj_02〜04）もあるよ。Cが気に入ったら他のも出すね。</p>
+    <p style="font-size:12px;opacity:.6;margin-top:10px;">このデザインでOKなら、4セット分（丸が1→2→3→4で進む版）を動画にするよ。直したいとこあれば言って！</p>
   </div>
 
   <div class="card">
-    <span class="tag">③ロゴ（8案できた！）</span>
-    <h2>雨音Cafe ロゴ — どれが好き？</h2>
-    <p>AIで作った8案。気になる番号を教えてね。選んだやつをKEIが最終仕上げ（gpt-image）する流れ。漢字「雨音」が崩れてないか見てね。</p>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_01.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">①</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_02.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">②</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_03.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">③</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_04.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">④</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_06.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">⑥</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_07.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">⑦</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_08.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">⑧</figcaption>
-      </figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:14px;padding:8px;">
-        <img src="logo/generated/logo_10.png" style="width:100%;border-radius:8px;display:block;">
-        <figcaption style="font-size:12px;text-align:center;margin-top:5px;opacity:.7;">⑩</figcaption>
-      </figure>
-    </div>
-    <div class="btns" style="margin-top:12px;">
-      <a class="btn alt ghost" href="logo/index.html">作る時のプロンプトも見る</a>
-    </div>
+    <span class="tag">②ロゴ（作り直し中）</span>
+    <h2>雨音Cafe ロゴ — 新8案を制作中</h2>
+    <p>①番ベースで修正：カップの肉球なし・周りのキラキラ雫なし・猫を1匹ちゃんと・横長に。テーマ「猫・雨・コーヒー」。文字ありVer＋文字なしVerを ChatGPT / Gemini / Grok / Midjourney の4つで＝8枚。できたらここに並べるね。</p>
+    <div class="wip">🐈 制作中…もうちょっと待ってて</div>
   </div>
 
-  <div class="note">背景の市松模様は「透過してる部分」の確認用。本番はKEIのVRChat背景動画に重ねるよ。</div>
+  <div class="note">市松模様は「透過してる部分」の確認用。本番はKEIのVRChat背景に重ねるよ。</div>
 </body>
 </html>

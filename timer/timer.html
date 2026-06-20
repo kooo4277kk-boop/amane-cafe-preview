@@ -1,305 +1,279 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雨音Cafe Pomodoro Timer</title>
+<title>雨音Cafe — FOCUS Timer</title>
 <style>
-  /* ===== フォント：丸みのあるゴシック ===== */
-  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
 
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-  body { background: transparent; }
-
-  /* 背景モード（JSが body に class を付与） */
-  body.bg-green  { background: #00FF00; }
-  body.bg-blue   { background: #0000FF; }
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}
+  body{background:transparent;}
+  /* 背景モード */
+  body.bg-green  { background:#00FF00; }
+  body.bg-blue   { background:#0000FF; }
   body.bg-checker{
-    background-color: #cfd8dc;
+    background-color:#c4d2d8;
     background-image:
-      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%),
-      linear-gradient(45deg, #b0bec5 25%, transparent 25%, transparent 75%, #b0bec5 75%);
-    background-size: 48px 48px;
-    background-position: 0 0, 24px 24px;
+      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%),
+      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%);
+    background-size:48px 48px; background-position:0 0,24px 24px;
+  }
+  /* ふわっとした水のアンビエント（CSS・控えめ）。alpha書き出し時はJSで消す */
+  #ambient{
+    position:absolute; inset:-20%; z-index:0; pointer-events:none; opacity:.0;
+    background:
+      radial-gradient(40% 30% at 30% 35%, rgba(175,228,255,.20), transparent 70%),
+      radial-gradient(45% 35% at 72% 62%, rgba(150,210,255,.16), transparent 72%),
+      radial-gradient(30% 24% at 55% 20%, rgba(210,245,255,.14), transparent 70%);
+    filter:blur(8px);
+    animation:drift 14s ease-in-out infinite alternate;
+    transition:opacity 1.4s ease;
+  }
+  @keyframes drift{
+    0%{transform:translate3d(-2%, -1%,0) scale(1.02);}
+    100%{transform:translate3d(2%, 2%,0) scale(1.06);}
   }
 
-  #stage{
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    font-family: 'M PLUS Rounded 1c', sans-serif;
-    /* 出現/消滅で stage 全体を制御 */
-    opacity: 0;
-    transition: opacity 1.2s ease;
-  }
-  #stage.show{ opacity: 1; }
+  #c3d{ position:absolute; inset:0; z-index:1; pointer-events:none; }
 
-  /* ===== 時刻表示 MM:SS ===== */
-  #time{
-    font-size: 168px;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: 4px;
-    line-height: 1;
-    /* やわらかい影。透過/クロマで色被りしないよう控えめ＆白系 */
-    text-shadow:
-      0 4px 18px rgba(120, 170, 200, 0.35),
-      0 1px 2px rgba(255, 255, 255, 0.6);
-    font-variant-numeric: tabular-nums;
-    /* 出現時の“にじみ出る”用 */
-    filter: blur(0px);
+  #ui{
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Baloo 2','M PLUS Rounded 1c',sans-serif;
+    /* 出現演出：最初はにじんで透明 */
+    opacity:0; filter:blur(18px); transform:scale(.96);
+    transition:opacity 1.2s ease, filter 1.3s ease, transform 1.3s cubic-bezier(.18,.9,.25,1);
   }
+  #ui.in{ opacity:1; filter:blur(0); transform:scale(1); }
+  #ui.out{ opacity:0; filter:blur(22px); transform:scale(1.05); transition:opacity 1.5s ease, filter 1.6s ease, transform 1.6s ease; }
 
-  /* ラベル（集中 / 休憩） */
-  #label{
-    margin-top: 10px;
-    font-size: 30px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 8px;
-    opacity: 0.92;
-    text-shadow: 0 2px 8px rgba(120,170,200,0.35);
+  .focus{
+    font-weight:700; letter-spacing:.42em; text-indent:.42em;
+    font-size:30px; color:#fff; opacity:.92;
+    text-shadow:0 2px 18px rgba(120,200,255,.55), 0 0 2px rgba(255,255,255,.6);
+    margin-bottom:6px;
   }
-
-  /* ===== 進捗ゲージ（4分割・水が溜まる） ===== */
-  #gauge{
-    position: relative;
-    margin-top: 46px;
-    width: 560px;
-    height: 26px;
-    display: flex;
-    gap: 8px;
+  .time{
+    font-weight:800; font-size:150px; line-height:1; color:#fff;
+    letter-spacing:.01em; font-variant-numeric:tabular-nums;
+    text-shadow:0 6px 34px rgba(120,200,255,.5), 0 1px 2px rgba(255,255,255,.5);
   }
-  .seg{
-    position: relative;
-    flex: 1;
-    height: 100%;
-    border-radius: 13px;
-    background: rgba(255,255,255,0.28);
-    overflow: hidden;
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.55);
+  /* 長いゲージ1本 */
+  .gauge{
+    margin-top:30px; width:440px; max-width:76vw; height:18px; border-radius:999px;
+    background:rgba(255,255,255,.26);
+    box-shadow:inset 0 1px 4px rgba(60,110,150,.28), 0 0 0 1.5px rgba(255,255,255,.55), 0 4px 14px rgba(120,200,255,.25);
+    overflow:hidden; position:relative;
   }
-  /* 各セグメントの“水”。height ではなく width で左→右に満ちる */
-  .seg .fill{
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 0%;
-    background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 100%);
-    box-shadow: 0 0 12px var(--accent-glow);
+  .gauge .fill{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg,#bfe9ff,#8fd2ff 60%,#73c4ff);
+    box-shadow:0 0 14px rgba(140,210,255,.85);
+    border-radius:999px;
   }
-  /* 水面のゆらぎ */
-  .seg .fill::after{
-    content:""; position:absolute; top:-2px; right:-6px; width:12px; height:130%;
-    background: rgba(255,255,255,0.55);
-    border-radius: 50%;
-    filter: blur(2px);
-    animation: ripple 1.6s ease-in-out infinite;
+  .gauge .fill::after{ /* 水面のハイライト */
+    content:""; position:absolute; right:-2px; top:0; bottom:0; width:10px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.9));
+    border-radius:999px;
   }
-  @keyframes ripple{
-    0%,100%{ transform: translateY(0) scaleY(1); opacity:.5; }
-    50%    { transform: translateY(2px) scaleY(.9); opacity:.85; }
+  /* 4つの丸 */
+  .dots{ margin-top:24px; display:flex; gap:20px; }
+  .dot{
+    width:17px; height:17px; border-radius:50%;
+    background:rgba(255,255,255,.22);
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.62);
   }
-
-  /* 出現演出：水滴＋波紋 */
-  #drop{
-    position:absolute; left:50%; top:-60px; transform:translateX(-50%);
-    width:16px; height:16px; border-radius:50% 50% 50% 50%;
-    background: radial-gradient(circle at 35% 30%, #ffffff, var(--accent-light));
-    opacity:0;
+  .dot.done{
+    background:radial-gradient(circle at 35% 32%,#eaf8ff,#9bd6ff 70%,#79c6ff);
+    box-shadow:0 0 10px rgba(140,210,255,.8), inset 0 0 0 1px rgba(255,255,255,.6);
   }
-  #ripple-ring{
-    position:absolute; left:50%; top:50%;
-    width:10px; height:10px; border-radius:50%;
-    border:3px solid var(--accent-light);
-    transform: translate(-50%,-50%) scale(0);
-    opacity:0;
+  .dot.active{
+    background:radial-gradient(circle at 35% 32%,#ffffff,#bfe9ff 70%,#8fd2ff);
+    box-shadow:0 0 16px rgba(150,215,255,.95), inset 0 0 0 1px rgba(255,255,255,.7);
+    animation:slowblink 10s ease-in-out infinite;
   }
+  @keyframes slowblink{ 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.32; transform:scale(.86);} }
 </style>
 </head>
 <body>
-  <div id="ripple-ring"></div>
-  <div id="stage">
-    <div id="drop"></div>
-    <div id="time">25:00</div>
-    <div id="label">集中</div>
-    <div id="gauge">
-      <div class="seg"><div class="fill"></div></div>
-      <div class="seg"><div class="fill"></div></div>
-      <div class="seg"><div class="fill"></div></div>
-      <div class="seg"><div class="fill"></div></div>
-    </div>
+  <div id="ambient"></div>
+  <canvas id="c3d"></canvas>
+  <div id="ui">
+    <div class="focus">FOCUS</div>
+    <div class="time" id="time">25:00</div>
+    <div class="gauge"><div class="fill" id="fill"></div></div>
+    <div class="dots" id="dots"></div>
   </div>
 
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script>
-/* =================================================================
-   雨音Cafe ポモドーロタイマー — パラメータ（ここだけ触れば量産可）
-   ================================================================= */
-const CONFIG = {
-  workMin:    25,         // 集中の分数（既定25）。50/10 等に変えるだけで派生可
-  breakMin:   5,          // 休憩の分数（連結モードで使用）
-  sets:       1,          // 連結モード時のセット数。1なら1セッションのみ
-  chainMode:  false,      // true: work→break→work… を連続再生（長尺用）
-  accentColor:'#7ec8e3',  // アクセント（ごく薄い水色）
-  bgMode:     'checker',  // 'alpha' | 'green' | 'blue' | 'checker'(確認用)
-  introWaitSec: 5,        // 出現後の待機（カウント開始まで）
-  outroWaitSec: 5,        // 00:00 後の待機（消えるまで）
-  introSec:   1.6,        // 出現演出の尺
-  outroSec:   1.6,        // 消滅演出の尺
-  labelWork:  '集中',
-  labelBreak: '休憩',
+/* ===================== パラメータ（上部にまとめて変数化） ===================== */
+const Q = new URLSearchParams(location.search);
+const P = {
+  workMin:    parseFloat(Q.get('workMin')   ?? 25),     // 集中の分数（既定25）
+  breakMin:   parseFloat(Q.get('breakMin')  ?? 5),
+  sets:       parseInt  (Q.get('sets')      ?? 4),      // 丸の数
+  currentSet: parseInt  (Q.get('set')       ?? 1),      // 今が何セット目か（1始まり・動画ごとに変える）
+  startDelay: parseFloat(Q.get('startDelay')?? 5),      // 出現後カウント開始まで待つ秒
+  endHold:    parseFloat(Q.get('endHold')   ?? 5),      // 00:00後に消えるまで待つ秒
+  bgMode:     (Q.get('bgMode') ?? 'checker'),           // alpha / green / blue / checker
+  demo:       parseFloat(Q.get('demo') ?? 1),           // 1=実時間, 大きいほど早送り(確認用)
+  accent:     (Q.get('accent') ?? '#bfe9ff'),
 };
+document.body.classList.add('bg-' + P.bgMode);
+const isAlpha = (P.bgMode === 'alpha');
+// アンビエントの水モヤはプレビュー(checker)時のみ。クロマ/透過書き出しでは消してキー抜きを汚さない
+if(P.bgMode === 'checker'){ document.getElementById('ambient').style.opacity = '1'; }
 
-/* ---- URLパラメータで一時上書き（確認用・量産時は不要） ----
-   例: timer.html?workMin=1&bgMode=checker  → 1分版で素早くプレビュー   */
-(function(){
-  const q = new URLSearchParams(location.search);
-  for(const [k,v] of q){
-    if(!(k in CONFIG)) continue;
-    if(typeof CONFIG[k]==='number') CONFIG[k]=Number(v);
-    else if(typeof CONFIG[k]==='boolean') CONFIG[k]=(v==='true'||v==='1');
-    else CONFIG[k]=v;
-  }
-})();
+/* ===================== DOM ===================== */
+const ui = document.getElementById('ui');
+const elTime = document.getElementById('time');
+const elFill = document.getElementById('fill');
+const elDots = document.getElementById('dots');
+for(let i=0;i<P.sets;i++){
+  const d=document.createElement('div'); d.className='dot';
+  if(i < P.currentSet-1) d.classList.add('done');
+  else if(i === P.currentSet-1) d.classList.add('active');
+  elDots.appendChild(d);
+}
+function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+elTime.textContent = fmt(P.workMin*60);
 
-/* ---- アクセント色の派生（薄色・グロー） ---- */
-function hexToRgb(h){ const n=parseInt(h.slice(1),16); return [n>>16&255,n>>8&255,n&255]; }
-function rgba(c,a){ const [r,g,b]=hexToRgb(c); return `rgba(${r},${g},${b},${a})`; }
-function lighten(h,amt){ const [r,g,b]=hexToRgb(h);
-  const f=v=>Math.round(v+(255-v)*amt).toString(16).padStart(2,'0');
-  return `#${f(r)}${f(g)}${f(b)}`; }
+/* ===================== Three.js（水滴＋波紋＋グロー） ===================== */
+const canvas=document.getElementById('c3d');
+const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:true, premultipliedAlpha:true});
+renderer.setClearColor(0x000000,0);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+let W=innerWidth,H=innerHeight;
+const cam=new THREE.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1000,1000);
+cam.position.z=10;
+function resize(){ W=innerWidth;H=innerHeight; renderer.setSize(W,H); cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2; cam.updateProjectionMatrix(); }
+resize(); addEventListener('resize',resize);
 
-document.documentElement.style.setProperty('--accent', CONFIG.accentColor);
-document.documentElement.style.setProperty('--accent-light', lighten(CONFIG.accentColor,0.5));
-document.documentElement.style.setProperty('--accent-glow', rgba(CONFIG.accentColor,0.6));
+const accentCol = new THREE.Color(P.accent);
 
-/* ---- 背景モード ---- */
-document.body.className = ({alpha:'', green:'bg-green', blue:'bg-blue', checker:'bg-checker'})[CONFIG.bgMode] || '';
+// ソフトな丸グローのテクスチャ
+function glowTex(){
+  const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d');
+  const g=x.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.25,'rgba(200,240,255,.9)');
+  g.addColorStop(.6,'rgba(150,210,255,.35)'); g.addColorStop(1,'rgba(150,210,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,256,256); return new THREE.CanvasTexture(c);
+}
+const gtex=glowTex();
 
-/* ---- 要素参照 ---- */
-const $stage = document.getElementById('stage');
-const $time  = document.getElementById('time');
-const $label = document.getElementById('label');
-const $fills = [...document.querySelectorAll('.seg .fill')];
-const $drop  = document.getElementById('drop');
-const $ring  = document.getElementById('ripple-ring');
+// 中央のソフトグロー（数字の後ろでポワーンと光る）
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:gtex,transparent:true,opacity:0,depthTest:false,blending:THREE.NormalBlending}));
+glow.scale.set(520,520,1); glow.position.set(0,18,0); scene.add(glow);
 
-const SEG = $fills.length; // 4分割
+// 水滴（しずく）：フレネルで縁が光る球
+const dropGeo=new THREE.SphereGeometry(20,48,48);
+const dropMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{ uCol:{value:accentCol}, uOpac:{value:0} },
+  vertexShader:`varying vec3 vN; varying vec3 vV;
+    void main(){ vN=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }`,
+  fragmentShader:`varying vec3 vN; varying vec3 vV; uniform vec3 uCol; uniform float uOpac;
+    void main(){ float f=pow(1.0-max(dot(vN,vV),0.0),1.8); vec3 col=mix(uCol*0.7, vec3(1.0), f);
+      float a=(0.30+0.70*f)*uOpac; gl_FragColor=vec4(col,a); }`
+});
+const drop=new THREE.Mesh(dropGeo,dropMat); drop.position.set(0,H/2+60,0); drop.visible=false; scene.add(drop);
 
-function fmt(sec){
-  sec = Math.max(0, Math.ceil(sec));
-  const m = Math.floor(sec/60), s = sec%60;
-  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+// 波紋リング（プール）
+const rings=[];
+for(let i=0;i<6;i++){
+  const m=new THREE.Mesh(new THREE.RingGeometry(0.86,1.0,80),
+    new THREE.MeshBasicMaterial({color:accentCol,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));
+  m.visible=false; scene.add(m); rings.push({m,t:0,life:0,delay:0,max:0});
+}
+function spawnRipples(cx,cy){
+  rings.forEach((r,i)=>{ r.m.position.set(cx,cy,0); r.t=0; r.delay=i*0.12; r.life=1.5+i*0.12; r.max=130+i*90; r.m.visible=true; });
+}
+// 跳ねる小しずく
+const splashes=[];
+for(let i=0;i<10;i++){
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:gtex,transparent:true,opacity:0,depthTest:false}));
+  s.scale.set(16,16,1); s.visible=false; scene.add(s); splashes.push({s,vx:0,vy:0,t:0,life:0});
+}
+function spawnSplash(cx,cy){
+  splashes.forEach((p,i)=>{ const a=(-0.5-Math.random()*Math.PI*0.0)+ (Math.random()*Math.PI); const ang=(Math.PI*0.15)+(Math.PI*0.7)*(i/splashes.length); const sp=120+Math.random()*160;
+    p.s.position.set(cx,cy,0); p.vx=Math.cos(ang)*sp*(Math.random()<.5?-1:1)*0.5 + (Math.random()-0.5)*40; p.vy=Math.sin(ang)*sp+120; p.t=0; p.life=0.6+Math.random()*0.5; p.s.visible=true; });
 }
 
-/* セグメント進捗（0..1）を 4本のバーに振り分け（左から水が満ちる） */
-function setProgress(p){
-  p = Math.min(1, Math.max(0, p));
-  for(let i=0;i<SEG;i++){
-    const lo=i/SEG, hi=(i+1)/SEG;
-    const local = (p<=lo)?0 : (p>=hi)?1 : (p-lo)/(hi-lo);
-    $fills[i].style.width = (local*100).toFixed(2)+'%';
-  }
-}
+/* ===================== タイムライン ===================== */
+const NOW=()=>performance.now()/1000;
+let state='intro', t0=NOW();
+const centerY=18;            // UIの中心と合わせる
+const impactY=centerY;
+let countStart=0, total=P.workMin*60, ended=false;
 
-/* easing */
-const easeOut = t => 1-Math.pow(1-t,3);
+function setState(s){ state=s; t0=NOW(); }
+// intro: しずく落下
+drop.visible=true; dropMat.uniforms.uOpac.value=0;
 
-/* ===== 出現演出：水滴が落ちて波紋→数字がにじみ出る ===== */
-function playIntro(){
-  return new Promise(res=>{
-    const D = CONFIG.introSec*1000;
-    // 水滴落下
-    $drop.animate(
-      [ {top:'-60px',opacity:0,offset:0},
-        {top:'-60px',opacity:1,offset:0.15},
-        {top:'calc(50% - 20px)',opacity:1,offset:0.55},
-        {top:'calc(50% - 8px)',opacity:0,offset:0.62} ],
-      {duration:D,easing:'cubic-bezier(.4,0,.7,1)',fill:'forwards'}
-    );
-    // 波紋
-    $ring.animate(
-      [ {transform:'translate(-50%,-50%) scale(0)',opacity:0,offset:0},
-        {transform:'translate(-50%,-50%) scale(0)',opacity:0,offset:0.55},
-        {transform:'translate(-50%,-50%) scale(1)',opacity:0.9,offset:0.62},
-        {transform:'translate(-50%,-50%) scale(22)',opacity:0,offset:1} ],
-      {duration:D,easing:'ease-out',fill:'forwards'}
-    );
-    // 数字＆ゲージがにじみ出る（ブラー→クリア＋フェード）
-    setTimeout(()=>{
-      $stage.classList.add('show');
-      $time.animate(
-        [ {filter:'blur(14px)',transform:'translateY(6px)',opacity:0},
-          {filter:'blur(0px)',transform:'translateY(0)',opacity:1} ],
-        {duration:D*0.5,easing:'ease-out',fill:'forwards'}
-      );
-    }, D*0.55);
-    setTimeout(res, D);
-  });
-}
-
-/* ===== 消滅演出：水に溶けて滲んで消える ===== */
-function playOutro(){
-  return new Promise(res=>{
-    const D = CONFIG.outroSec*1000;
-    $time.animate(
-      [ {filter:'blur(0px)',opacity:1,transform:'translateY(0) scale(1)'},
-        {filter:'blur(16px)',opacity:0,transform:'translateY(10px) scale(1.04)'} ],
-      {duration:D,easing:'ease-in',fill:'forwards'}
-    );
-    $stage.style.transition = `opacity ${D}ms ease-in`;
-    requestAnimationFrame(()=> $stage.classList.remove('show'));
-    setTimeout(res, D);
-  });
-}
-
-/* ===== 1フェーズのカウントダウン（work or break） ===== */
-function runCountdown(totalSec, label){
-  return new Promise(res=>{
-    $label.textContent = label;
-    const start = performance.now();
-    function tick(now){
-      const elapsed = (now-start)/1000;
-      const remain  = totalSec - elapsed;
-      $time.textContent = fmt(remain);
-      setProgress(elapsed/totalSec);
-      if(remain > 0){ requestAnimationFrame(tick); }
-      else { $time.textContent='00:00'; setProgress(1); res(); }
+function update(){
+  const t=NOW()-t0;
+  if(state==='intro'){
+    // 0.15s フェードイン → 0.95sかけて落下
+    const fall=Math.min(t/0.95,1);
+    const e=fall*fall; // ease-in
+    const y=(H/2+60) + (impactY-(H/2+60))*e;
+    drop.position.y=y;
+    dropMat.uniforms.uOpac.value=Math.min(t/0.2,1);
+    // 落下に従い少し縦長（しずく感）
+    drop.scale.set(1-0.18*e, 1+0.30*e, 1);
+    if(fall>=1){
+      // 着水：潰す→波紋＆スプラッシュ→UIをにじみ出す
+      spawnRipples(0,impactY); spawnSplash(0,impactY);
+      glowMatPulse();
+      drop.scale.set(1.5,0.5,1);
+      setState('squash');
     }
-    // 初期表示
-    $time.textContent = fmt(totalSec); setProgress(0);
-    requestAnimationFrame(tick);
-  });
-}
-
-const wait = s => new Promise(r=>setTimeout(r, s*1000));
-
-/* ===== シーケンス ===== */
-async function main(){
-  // 初期表示の数字をworkに合わせる
-  $time.textContent = fmt(CONFIG.workMin*60);
-  $label.textContent = CONFIG.labelWork;
-
-  await playIntro();
-  await wait(CONFIG.introWaitSec);          // 出現後 5秒待機
-
-  if(!CONFIG.chainMode){
-    await runCountdown(CONFIG.workMin*60, CONFIG.labelWork);
-  } else {
-    for(let i=0;i<CONFIG.sets;i++){
-      await runCountdown(CONFIG.workMin*60, CONFIG.labelWork);
-      if(i < CONFIG.sets-1){
-        await runCountdown(CONFIG.breakMin*60, CONFIG.labelBreak);
-      }
-    }
+  } else if(state==='squash'){
+    const k=Math.min(t/0.25,1);
+    drop.scale.set(1.5+1.0*k, 0.5*(1-k), 1);
+    dropMat.uniforms.uOpac.value=(1-k);
+    if(k>=1){ drop.visible=false; ui.classList.add('in'); setState('hold'); elTime.textContent=fmt(total); }
+  } else if(state==='hold'){
+    if(t>=P.startDelay){ countStart=NOW(); setState('running'); }
+  } else if(state==='running'){
+    const elapsed=(NOW()-countStart)*P.demo;
+    const remain=total-elapsed;
+    elTime.textContent=fmt(remain);
+    elFill.style.width=Math.min(100,(elapsed/total)*100)+'%';
+    if(remain<=0 && !ended){ ended=true; elTime.textContent='00:00'; elFill.style.width='100%';
+      // 現在セットの丸を満たす
+      const dots=elDots.children; if(dots[P.currentSet-1]){ dots[P.currentSet-1].classList.remove('active'); dots[P.currentSet-1].classList.add('done'); }
+      setState('endhold'); }
+  } else if(state==='endhold'){
+    if(t>=P.endHold){ ui.classList.remove('in'); ui.classList.add('out'); spawnRipplesInward(); setState('gone'); }
   }
 
-  await wait(CONFIG.outroWaitSec);          // 00:00 後 5秒待機
-  await playOutro();
+  // 波紋更新
+  rings.forEach(r=>{ if(!r.m.visible) return; r.t+=1/60; const lt=r.t-r.delay; if(lt<0) return;
+    const k=lt/r.life; if(k>=1){ r.m.visible=false; return; }
+    const sc=4+k*r.max; r.m.scale.set(sc,sc,1); r.m.material.opacity=(1-k)*0.5; });
+  // スプラッシュ更新（重力）
+  splashes.forEach(p=>{ if(!p.s.visible) return; p.t+=1/60; if(p.t>=p.life){ p.s.visible=false; return; }
+    p.vy-=520*(1/60); p.s.position.x+=p.vx*(1/60); p.s.position.y+=p.vy*(1/60);
+    const k=p.t/p.life; p.s.material.opacity=(1-k)*0.9; p.s.scale.setScalar(16*(1-0.5*k)); });
 
-  // 書き出しツール用の完了マーカー（puppeteerが検知してキャプチャ終了）
-  window.__TIMER_DONE__ = true;
-  document.title = 'DONE';
+  // グローの呼吸
+  if(glow.material.opacity>0 && state!=='gone'){ glow.material.opacity=Math.max(glow.material.opacity, baseGlow*(0.9+0.1*Math.sin(NOW()*1.3))); }
+
+  renderer.render(scene,cam);
+  requestAnimationFrame(update);
 }
-main();
+let baseGlow=0;
+function glowMatPulse(){ baseGlow=0.0; glow.material.opacity=0; let s=NOW();
+  const ramp=()=>{ const k=Math.min((NOW()-s)/1.1,1); baseGlow=0.55*k; glow.material.opacity=baseGlow; if(k<1) requestAnimationFrame(ramp); };
+  ramp();
+}
+function spawnRipplesInward(){ /* 消える時：内側に収束する微かな波紋 */ spawnRipples(0,impactY); rings.forEach((r,i)=>{ r.max=-(80+i*40); }); }
+
+update();
 </script>
 </body>
 </html>
