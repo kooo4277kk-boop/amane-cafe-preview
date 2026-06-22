@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨音Cafe ロゴ プロンプト案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
+  body{ margin:0; font-family:'M PLUS Rounded 1c',sans-serif; color:#37576a;
+    background:linear-gradient(160deg,#eaf4f8,#cfe0ea); padding:24px 16px 60px; }
+  .wrap{ max-width:560px; margin:0 auto; }
+  a.back{ font-size:13px; color:#5a8298; text-decoration:none; }
+  h1{ font-size:22px; font-weight:800; margin:10px 0 6px; }
+  .lead{ font-size:13px; opacity:.78; line-height:1.7; margin-bottom:20px; }
+  .card{ background:#fff; border-radius:18px; padding:16px 16px 18px; margin-bottom:16px;
+    box-shadow:0 6px 18px rgba(120,170,200,.2); }
+  .card h2{ font-size:16px; margin:0 0 6px; }
+  .tag{ font-size:11px; background:#eaf4f8; color:#5a8298; padding:3px 9px; border-radius:9px; }
+  pre{ white-space:pre-wrap; word-break:break-word; font-size:12.5px; line-height:1.6;
+    background:#f4f8fa; border-radius:12px; padding:12px; margin:10px 0 0; color:#33505f;
+    font-family:'M PLUS Rounded 1c',monospace; }
+  .req{ font-size:12.5px; line-height:1.7; background:#fff7ea; border-radius:12px; padding:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">← もどる</a>
+  <h1>雨音Cafe ロゴ プロンプト案</h1>
+  <p class="lead">各ツールで2〜4枚ずつ回して計10枚生成→KEIが選定→gpt-imageで最終仕上げ。</p>
+
+  <div class="card">
+    <span class="tag">共通の必須条件</span>
+    <div class="req" style="margin-top:8px;">
+      ・テキストは必ず「雨音Cafe」。漢字「雨音」が崩れてないものだけ採用（誤字チェック必須）<br>
+      ・背景は純白(#FFFFFF)か純黒のフラット・影なし。ロゴ中央・余白あり<br>
+      ・切り抜きやすい高解像度PNG<br>
+      ・世界観：どうぶつの森的ほのぼの・ふわふわ
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="tag">変種① ChatGPT (gpt-image)</span>
+    <pre>かわいいロゴデザイン。テキストは日本語で「雨音Cafe」。
+「雨音」の部分は、水色の光沢グラデーション＋白の極太フチを持つ、ぷっくり丸い団扇文字（推し文字）風の太ゴシック。文字のまわりに雨だれの粒と星のキラキラを散らす。
+「Cafe」の部分は、温かい茶色のグラデーションの丸文字で、クリーム色のフチ。すぐ横に湯気が立つ小さなコーヒーカップ。
+黒猫のしっぽが文字にくるんと巻きつく、ほのぼのした「あつまれ どうぶつの森」風のやわらかい世界観。
+背景は純白でフラット、影なし。ロゴだけを中央に置き、周囲に余白。高解像度、切り抜きしやすい仕様。
+漢字「雨音」は正確に、崩さない。</pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">変種② Google Gemini (Imagen)</span>
+    <pre>A cute kawaii Japanese logo with the exact text "雨音Cafe".
+"雨音" (Japanese kanji): puffy rounded bubble lettering, glossy light-blue gradient fill with a thick white outline, decorated with small raindrops and sparkling stars. Soft, plump "uchiwa moji" idol-style typography.
+"Cafe": warm brown gradient rounded letters with a cream outline, next to a tiny steaming coffee cup.
+A black cat's tail curls around the letters. Soft, cozy "Animal Crossing" aesthetic, pastel and fluffy.
+Flat pure-white (#FFFFFF) background, no shadow, logo centered with margin around it.
+High resolution, clean edges for easy cutout. Render the kanji 雨音 accurately, do not distort it.</pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">変種③ xAI Grok</span>
+    <pre>Kawaii logo, text "雨音Cafe".
+- "雨音": glossy light-blue gradient, thick white outline, puffy rounded bubble font, raindrops + sparkles.
+- "Cafe": warm brown gradient rounded font, cream outline, small steaming coffee cup beside it.
+- A black cat tail wrapping around the text.
+- Animal-Crossing-style cozy fluffy mood.
+- Flat pure white background, no shadow, centered with margin, high-res PNG, clean cutout edges.
+- Accurate Japanese kanji 雨音, no distortion.</pre>
+  </div>
+</div>
+</body>
+</html>

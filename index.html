@@ -1,125 +1,98 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雨音Cafe 素材プレビュー</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>啓-KEI-pomodoro // 制作物</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap');
-  *{box-sizing:border-box;}
+  :root{
+    --bg:#0a0a0a;
+    --w:#ffffff;
+    --w70:rgba(255,255,255,.70);
+    --w45:rgba(255,255,255,.45);
+    --w20:rgba(255,255,255,.20);
+    --w08:rgba(255,255,255,.08);
+    --glow:0 0 1px rgba(255,255,255,.9), 0 0 18px rgba(255,255,255,.18);
+    --mono:"Share Tech Mono", ui-monospace, monospace;
+    --code:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{min-height:100%}
   body{
-    margin:0; min-height:100vh; font-family:'M PLUS Rounded 1c',sans-serif;
-    background: linear-gradient(160deg,#eaf4f8 0%,#dbeaf2 60%,#cfe0ea 100%);
-    color:#37576a; display:flex; flex-direction:column; align-items:center;
-    padding:32px 18px 60px;
+    background:var(--bg); color:var(--w);
+    font-family:var(--code);
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(28px,7vw,72px) clamp(20px,6vw,64px) 80px;
+    max-width:780px; margin:0 auto;
   }
-  h1{ font-size:24px; font-weight:800; margin:18px 0 4px; }
-  .sub{ font-size:13px; opacity:.7; margin-bottom:26px; text-align:center; }
+  header{border-bottom:1px solid var(--w20); padding-bottom:22px; margin-bottom:34px}
+  .brand{
+    font-family:var(--mono);
+    font-size:clamp(22px,5.5vw,34px);
+    letter-spacing:.14em; text-shadow:var(--glow);
+  }
+  .brand .sub{color:var(--w45); font-size:.5em; letter-spacing:.3em}
+  .tag{color:var(--w45); font-size:clamp(11px,2.6vw,13px); letter-spacing:.18em; margin-top:10px}
+
+  .sect{font-family:var(--mono); color:var(--w45); letter-spacing:.3em;
+    font-size:clamp(11px,2.6vw,13px); margin:30px 0 16px}
+
   .card{
-    width:100%; max-width:460px; background:#fff; border-radius:22px;
-    padding:20px 20px 18px; margin-bottom:18px;
-    box-shadow:0 8px 24px rgba(120,170,200,.22);
+    display:block; text-decoration:none; color:inherit;
+    border:1px solid var(--w20); background:var(--w08);
+    padding:20px 22px; margin-bottom:16px;
+    transition:border-color .2s, background .2s;
   }
-  .card h2{ font-size:18px; margin:0 0 4px; font-weight:800; }
-  .card p{ font-size:13px; line-height:1.6; margin:0 0 14px; opacity:.78; }
-  .btns{ display:flex; flex-wrap:wrap; gap:10px; }
-  a.btn{
-    display:inline-block; text-decoration:none; font-weight:700; font-size:14px;
-    padding:11px 16px; border-radius:14px; color:#fff;
-    background:linear-gradient(180deg,#9ad3e8,#6bb8d6);
-    box-shadow:0 3px 10px rgba(107,184,214,.4);
-  }
-  a.btn.ghost{ background:#eef4f7; color:#5a8298; box-shadow:none; }
-  .tag{ display:inline-block; font-size:11px; background:#eaf4f8; color:#5a8298; padding:3px 9px; border-radius:9px; margin-bottom:8px; }
-  .frame{
-    width:100%; aspect-ratio:9/12; border:0; border-radius:16px; display:block;
-    background-color:#c4d2d8;
-    background-image:
-      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%),
-      linear-gradient(45deg,#a9bcc4 25%,transparent 25%,transparent 75%,#a9bcc4 75%);
-    background-size:40px 40px; background-position:0 0,20px 20px;
-  }
-  .wip{ font-size:13px; opacity:.6; padding:10px 0; }
-  .note{ font-size:12px; opacity:.6; max-width:460px; text-align:center; margin-top:6px; line-height:1.6; }
+  .card:hover{border-color:var(--w70); background:rgba(255,255,255,.12)}
+  .card .no{font-family:var(--mono); color:var(--w45); letter-spacing:.2em; font-size:12px}
+  .card .ttl{font-family:var(--mono); font-size:clamp(17px,4.4vw,22px);
+    letter-spacing:.06em; margin:6px 0 8px; text-shadow:var(--glow)}
+  .card .desc{color:var(--w70); font-size:clamp(12px,3vw,14px); line-height:1.7}
+  .card .meta{color:var(--w45); font-size:11px; letter-spacing:.12em; margin-top:12px}
+  .card .arrow{float:right; color:var(--w45)}
+
+  .note{color:var(--w45); font-size:12px; line-height:1.8; margin-top:8px;
+    border-left:1px solid var(--w20); padding-left:14px}
+
+  footer{margin-top:48px; color:var(--w20); font-size:11px; letter-spacing:.2em;
+    font-family:var(--mono); border-top:1px solid var(--w08); padding-top:18px}
 </style>
 </head>
 <body>
-  <h1>雨音Cafe 素材プレビュー</h1>
-  <div class="sub">まだ決まってない素材だけ載せてるよ / by リン<br>（決まったやつは素材フォルダへ卒業）</div>
+  <header>
+    <div class="brand">啓-KEI-<span class="sub">POMODORO</span></div>
+    <div class="tag">STUDY WITH ME // WHITE FIGURE // VRCHAT</div>
+  </header>
 
-  <div class="card">
-    <span class="tag">①25分タイマー（新デザイン・確定したい）</span>
-    <h2>FOCUS タイマー</h2>
-    <p>水滴がポタッ→波紋がポワーン→FOCUSと数字がにじみ出て5秒後スタート。数字の下に長いゲージ1本＋4つの丸（今のセットがゆっくり点滅）。Three.jsでリッチにしたよ。読み込むと演出が再生される（もう一回見たいリロードしてね）。</p>
-    <iframe class="frame" src="timer/timer.html?bgMode=checker&set=2&demo=80" title="focus timer"></iframe>
-    <div class="btns" style="margin-top:12px;">
-      <a class="btn" href="timer/timer.html?bgMode=checker&set=1" target="_blank">▶ 大きく見る（実速・25分）</a>
-      <a class="btn ghost" href="timer/timer.html?bgMode=checker&set=2&demo=60" target="_blank">早送りで全体を見る</a>
-      <a class="btn ghost" href="timer/timer.html?bgMode=green&set=1" target="_blank">緑クロマ確認</a>
+  <div class="sect">// 制作物 DELIVERABLES</div>
+
+  <a class="card" href="timer/focus_25.html">
+    <span class="arrow">→</span>
+    <div class="no">No.01 — TIMER</div>
+    <div class="ttl">FOCUS 25:00</div>
+    <div class="desc">
+      25分集中タイマー（確定版）。読み込むと 5-4-3-2-1 のカウントダウンから自動スタート、
+      ゲージが下から溜まっていくよ。背景はクロマキー用グリーンだから、Premiereで緑を抜いて
+      VRChatの映像に重ねてね。
     </div>
-    <p style="font-size:12px;opacity:.6;margin-top:10px;">このデザインでOKなら、4セット分（丸が1→2→3→4で進む版）を動画にするよ。直したいとこあれば言って！</p>
+    <div class="meta">GREENSCREEN #00B140 ／ 自動スタート ／ 操作ボタンなし</div>
+  </a>
+
+  <div class="note">
+    タップしても緑一色の上に白いタイマーが出るだけなのが正解だよ。<br>
+    その緑を編集で抜いて、KEIが撮ったVRChat背景に乗せる前提。
   </div>
 
-  <div class="card">
-    <span class="tag">②ロゴ 新8案（猫・雨・コーヒー）</span>
-    <h2>雨音Cafe ロゴ — 4つのAI×文字あり/なし</h2>
-    <p>修正反映：肉球プリントなし・キラキラ雫なし・猫を1匹ちゃんと・横長。各AIで「文字あり」「文字なし」の2枚。気になるのの番号（例：ChatGPT文字あり）を教えて！文字が崩れてないかも見てね。</p>
-
-    <div style="background:#fef3f8;border:2px solid #f3c6dd;border-radius:14px;padding:12px;margin:6px 0 16px;">
-      <div style="font-size:13px;font-weight:800;color:#c4567f;margin-bottom:8px;">★ 最新・ガーリー版（白猫耳＆しっぽ／装飾なし／Cafeピンク）</div>
-      <div style="font-size:12px;opacity:.75;margin-bottom:10px;">flash_01ベースに可愛く寄せた3案。猫の耳としっぽは白、周りの装飾は全部なし＝文字に集中、Cafeは茶色やめてピンク系、雨音とCafeでメリハリ。女の子ポップで高品質。</div>
-      <div style="font-size:11px;opacity:.6;margin:8px 0 3px;">A：ストロベリーミルク</div>
-      <img src="logo/generated_v2/girly_a_01.png" style="width:100%;border-radius:8px;display:block;background:#fff;">
-      <div style="font-size:12px;font-weight:800;color:#3aa53a;margin:10px 0 3px;">B：パステルソーダ（水色×ピンク）✅ 決定！</div>
-      <img src="logo/generated_v2/girly_b_01.png" style="width:100%;border-radius:10px;display:block;background:#fff;outline:3px solid #7fd27f;outline-offset:2px;">
-      <div style="font-size:11px;opacity:.6;margin:10px 0 3px;">C：ゆめかわパステル</div>
-      <img src="logo/generated_v2/girly_c_01.png" style="width:100%;border-radius:8px;display:block;background:#fff;" onerror="this.style.display='none';this.previousElementSibling.style.display='none'">
-    </div>
-    <details style="margin:0 0 16px;">
-      <summary style="font-size:12px;opacity:.65;cursor:pointer;">前の案も見る（方向性ちがい）</summary>
-      <div style="font-size:11px;opacity:.6;margin-top:8px;">派手・黒しっぽ＆耳</div>
-      <img src="logo/generated_v2/flash_01.png" style="width:100%;border-radius:8px;display:block;background:#fff;margin-top:4px;">
-      <div style="font-size:11px;opacity:.6;margin-top:8px;">参考品質・しっぽ語尾</div>
-      <img src="logo/generated_v2/scratch2_01.png" style="width:100%;border-radius:8px;display:block;background:#fff;margin-top:4px;">
-      <div style="font-size:11px;opacity:.6;margin-top:8px;">番組級（猫まるごと）</div>
-      <img src="logo/generated_v2/premium_01.png" style="width:100%;border-radius:8px;display:block;background:#fff;margin-top:4px;opacity:.9;">
-    </details>
-
-    <h3 style="font-size:14px;margin:14px 0 8px;">ChatGPT（一番高品質）</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/chatgpt_text.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字あり</figcaption></figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/chatgpt_notext.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字なし</figcaption></figure>
-    </div>
-
-    <h3 style="font-size:14px;margin:14px 0 8px;">Grok</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/grok_text.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字あり</figcaption></figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/grok_notext.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字なし</figcaption></figure>
-    </div>
-
-    <h3 style="font-size:14px;margin:14px 0 8px;">Gemini</h3>
-    <div class="wip" style="padding:8px 0;">⚠️ Geminiは画像作成の自動操作が不安定で今回は取得できず。欲しければ後で再挑戦するね（ChatGPTが一番きれいだったので、まずはそっち見て）。</div>
-
-    <h3 style="font-size:14px;margin:14px 0 8px;">Midjourney</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/mj_text.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字あり（Cafeのみ）</figcaption></figure>
-      <figure style="margin:0;background:#fff;border:1px solid #e2edf2;border-radius:12px;padding:6px;">
-        <img src="logo/generated_v2/mj_notext.png" style="width:100%;border-radius:6px;display:block;">
-        <figcaption style="font-size:11px;text-align:center;opacity:.7;margin-top:4px;">文字なし</figcaption></figure>
-    </div>
-    <p style="font-size:12px;opacity:.6;margin-top:12px;">※日本語「雨音」はChatGPTが一番きれいに出た。他は崩れがちなので文字なし推奨。選んだやつをKEIが最終仕上げしてね。</p>
+  <div class="sect">// 次にやる NEXT</div>
+  <div class="note">
+    ・白い人形が動くループ映像（Veoの呪文を用意中）<br>
+    ・啓-KEI-pomodoro のロゴ（右上用）<br>
+    できたらここに No.02、No.03… って積んでいくね。
   </div>
 
-  <div class="note">市松模様は「透過してる部分」の確認用。本番はKEIのVRChat背景に重ねるよ。</div>
+  <footer>啓-KEI-pomodoro &nbsp;//&nbsp; built by リン</footer>
 </body>
 </html>
