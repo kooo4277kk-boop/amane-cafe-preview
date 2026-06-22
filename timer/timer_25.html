@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>啓-KEI-pomodoro // TIMER 25 [greenscreen]</title>
+
+<!--
+  ============================================================================
+  啓-KEI-pomodoro  ─  TIMER ONLY (25min / greenscreen)
+  ----------------------------------------------------------------------------
+  ・3分割素材のうち「本体タイマー」。intro(タイプ演出)・countdown(5-4-3-2-1)は別ファイル。
+  ・読み込むとすぐ 25:00 から自動カウントダウン（カウントイン無し）。
+  ・ゲージ＝動くスイープ無し。ただ白く溜まるだけ（目に優しく）。
+  ・SESSION 01/04 はゆっくり点滅。
+  ・背景 #00B140（クロマキー）。量産は CONFIG の DURATION_MIN / MODE_LABEL を変更。
+  ============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --w:#ffffff;
+    --w90:rgba(255,255,255,.90);
+    --w55:rgba(255,255,255,.55);
+    --w30:rgba(255,255,255,.30);
+    --key:#00B140;
+    --glow:0 0 1px rgba(255,255,255,.95), 0 0 14px rgba(255,255,255,.35), 0 0 40px rgba(255,255,255,.18);
+    --mono:"Share Tech Mono", ui-monospace, monospace;
+    --code:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--key);
+    color:var(--w);
+    font-family:var(--mono);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .stage{position:relative; width:min(92vw,1100px); padding:5vh 4vw}
+
+  .core{display:flex; flex-direction:column; align-items:center; gap:clamp(10px,2.2vh,22px)}
+
+  .label{
+    font-size:clamp(13px,2.2vw,22px);
+    letter-spacing:.78em; text-indent:.78em;
+    color:var(--w90); text-shadow:var(--glow);
+  }
+  .clock{
+    font-family:var(--mono);
+    font-size:clamp(78px,21vw,260px);
+    line-height:.92; letter-spacing:.02em;
+    color:var(--w); text-shadow:var(--glow);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---- plain white gauge: just fills up, no moving sweep (eye-friendly) ---- */
+  .gauge-wrap{width:min(78vw,760px); margin-top:clamp(14px,3vh,30px)}
+  .gauge{
+    position:relative; height:clamp(16px,2.4vh,26px);
+    border:1px solid var(--w30); overflow:hidden;
+  }
+  .gauge-fill{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:var(--w);
+    box-shadow:0 0 12px rgba(255,255,255,.40);
+    transition:width 1s linear;     /* slowly creeps up, no flashing */
+  }
+
+  /* SESSION 01/04 — slow gentle blink */
+  .session{
+    font-family:var(--code);
+    font-size:clamp(11px,1.45vw,15px);
+    letter-spacing:.22em; color:var(--w55);
+    margin-top:12px; text-align:center;
+    animation:sessBlink 2.6s ease-in-out infinite;
+  }
+  .session .k{color:var(--w30)}
+  @keyframes sessBlink{0%,100%{opacity:.30}50%{opacity:.95}}
+
+  @media (prefers-reduced-motion: reduce){
+    .session{animation:none}
+    .gauge-fill{transition:none}
+  }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <div class="core">
+      <div class="label">FOCUS</div>
+      <div class="clock" id="clock">25:00</div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <div class="gauge-fill" id="fill"></div>
+        </div>
+        <div class="session"><span class="k">SESSION</span> <span id="sess">01 / 04</span></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  /* ===================== CONFIG (量産用) ===================== */
+  const DURATION_MIN = 25;          // ← 5 / 50 に変えて休憩版・50分版を出す
+  const MODE_LABEL   = "FOCUS";     // BREAK版は "BREAK"
+  const SESSION_TAG  = "01 / 04";
+  const AUTOSTART_MS = 400;         // 読み込み→自動開始までの間（カウントイン無し）
+  /* ========================================================== */
+
+  const TOTAL = DURATION_MIN*60;
+  let remaining = TOTAL, timer = null;
+
+  const $=(id)=>document.getElementById(id);
+  const clock=$("clock"), fill=$("fill"), sess=$("sess");
+  document.querySelector(".label").textContent = MODE_LABEL;
+  sess.textContent = SESSION_TAG;
+
+  const fmt=(s)=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+
+  function render(){
+    clock.textContent = fmt(remaining);
+    fill.style.width = ((TOTAL-remaining)/TOTAL*100)+"%";   // 溜まる方向
+  }
+  function tick(){
+    if(remaining<=0){ clearInterval(timer); return; }
+    remaining--; render();
+  }
+  function run(){ clearInterval(timer); timer=setInterval(tick,1000); }
+
+  render();
+  setTimeout(run, AUTOSTART_MS);   // カウントイン無しで即スタート
+</script>
+</body>
+</html>

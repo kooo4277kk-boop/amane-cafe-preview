@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>啓-KEI-pomodoro // COUNTDOWN 5-4-3-2-1 [greenscreen]</title>
+
+<!--
+  ============================================================================
+  啓-KEI-pomodoro  ─  COUNTDOWN ONLY (5-4-3-2-1 / greenscreen)
+  ----------------------------------------------------------------------------
+  ・3分割素材のうち「5-4-3-2-1」だけを単独で。中央に大きくグリッチ表示。
+  ・読み込むと自動で 5→4→3→2→1 と進み、終わったら消えて緑だけになる。
+  ・背景 #00B140（クロマキー）。
+  ============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --w:#ffffff;
+    --key:#00B140;
+    --glow:0 0 1px rgba(255,255,255,.95), 0 0 14px rgba(255,255,255,.35), 0 0 40px rgba(255,255,255,.18);
+    --mono:"Share Tech Mono", ui-monospace, monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--key);
+    color:var(--w);
+    font-family:var(--mono);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{
+    font-size:clamp(120px,40vw,420px);
+    color:var(--w); text-shadow:var(--glow); line-height:1;
+  }
+  .num.go{ animation:glitch .9s steps(2) 1; }
+  @keyframes glitch{
+    0%{clip-path:inset(0 0 0 0); transform:translateX(0); opacity:.2}
+    12%{clip-path:inset(42% 0 38% 0); transform:translateX(-6px)}
+    24%{clip-path:inset(0 0 0 0); transform:translateX(4px); opacity:1}
+    40%{clip-path:inset(70% 0 8% 0); transform:translateX(-3px)}
+    60%{clip-path:inset(0 0 0 0); transform:translateX(0)}
+    100%{opacity:1; transform:translateX(0)}
+  }
+  @media (prefers-reduced-motion: reduce){ .num.go{animation:none} }
+</style>
+</head>
+<body>
+  <div class="num" id="num">5</div>
+
+<script>
+  const COUNT_IN = [5,4,3,2,1];
+  const START_MS = 300;
+  const numEl = document.getElementById("num");
+
+  function show(v){
+    numEl.textContent = v;
+    numEl.classList.remove("go"); void numEl.offsetWidth; numEl.classList.add("go");
+  }
+
+  function run(){
+    let i=0;
+    show(COUNT_IN[i]); i++;
+    const t=setInterval(()=>{
+      if(i>=COUNT_IN.length){ clearInterval(t); numEl.style.display="none"; return; } // 終了→消える
+      show(COUNT_IN[i]); i++;
+    },1000);
+  }
+
+  setTimeout(run, START_MS);
+</script>
+</body>
+</html>

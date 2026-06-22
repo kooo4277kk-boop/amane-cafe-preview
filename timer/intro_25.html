@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>啓-KEI-pomodoro // INTRO prompt [greenscreen]</title>
+
+<!--
+  ============================================================================
+  啓-KEI-pomodoro  ─  INTRO (typed prompt only / greenscreen)
+  ----------------------------------------------------------------------------
+  ・3分割素材のうち「冒頭のタイプ演出」だけ。左上に置く前提で左上寄せ。
+  ・kei@pomodoro:~$ focus --25min --session 01 / 04 をキーボード入力風にタイプ。
+  ・打ち終わったあとのカチカチ点滅は無し（カーソルは静止のまま）。
+  ・背景 #00B140（クロマキー）。
+  ============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --w:#ffffff;
+    --w55:rgba(255,255,255,.55);
+    --key:#00B140;
+    --glow:0 0 1px rgba(255,255,255,.9), 0 0 12px rgba(255,255,255,.30);
+    --code:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--key);
+    color:var(--w);
+    font-family:var(--code);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 左上に置く前提の寄せ */
+  .prompt{
+    position:absolute; top:clamp(20px,5vh,56px); left:clamp(20px,4vw,56px);
+    font-size:clamp(16px,2.4vw,30px);
+    letter-spacing:.03em; color:var(--w);
+    text-shadow:var(--glow);
+    white-space:nowrap;
+  }
+  /* 静止カーソル（点滅しない） */
+  .cursor{
+    display:inline-block; width:.60em; height:1.05em;
+    background:var(--w); margin-left:.12em; transform:translateY(.16em);
+    box-shadow:var(--glow);
+  }
+</style>
+</head>
+<body>
+  <div class="prompt" id="prompt"></div>
+
+<script>
+  const DURATION_MIN = 25;
+  const SESSION_TAG  = "01 / 04";
+  const promptEl = document.getElementById("prompt");
+  const full = "kei@pomodoro:~$ focus --"+DURATION_MIN+"min --session "+SESSION_TAG;
+  const esc=(s)=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function draw(i){
+    promptEl.innerHTML = esc(full.slice(0,i)) + '<span class="cursor"></span>';
+  }
+
+  if(reduce){
+    draw(full.length);            // 即表示（カーソルは静止）
+  }else{
+    let i=0;
+    const t=setInterval(()=>{
+      draw(i); i++;
+      if(i>full.length){ clearInterval(t); draw(full.length); }  // 打ち終わり→静止
+    },42);
+  }
+</script>
+</body>
+</html>
