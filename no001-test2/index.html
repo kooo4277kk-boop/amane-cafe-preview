@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberLove — ポモドーロ No.001 テスト2（リテイク反映）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Zen+Dots&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff2d86;--cyan:#00e5ff;--bg:#06040b;--card:#100a18}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(120% 80% at 50% -10%,#1a0e26,#06040b 60%);color:#eee;
+ font-family:'Rajdhani','Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 80px}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.05;
+ background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
+header{text-align:center;padding:42px 18px 26px}
+.brand{font-family:'Zen Dots';font-size:clamp(26px,7vw,46px);color:#fff;letter-spacing:.02em;
+ text-shadow:0 0 22px rgba(255,45,134,.8)}
+.brand i{color:var(--pink);font-style:normal}
+.tag{font-family:'Orbitron';font-weight:700;letter-spacing:.3em;color:var(--cyan);
+ margin-top:10px;font-size:clamp(11px,3vw,15px);text-shadow:0 0 12px rgba(0,229,255,.8)}
+.lead{max-width:780px;margin:18px auto 0;padding:0 18px;color:#cfc8da;line-height:1.7;font-size:15px}
+.lead b{color:#fff}
+h2{font-family:'Orbitron';font-weight:900;font-size:clamp(16px,4.4vw,22px);color:#fff;
+ margin:52px auto 4px;max-width:1040px;padding:0 18px;letter-spacing:.05em}
+h2 small{font-family:'Rajdhani';font-weight:600;color:#9a8fb0;display:block;font-size:14px;margin-top:6px;line-height:1.6}
+.herovid{max-width:900px;margin:18px auto 0;padding:0 18px}
+.herovid video,.herovid img{width:100%;border-radius:14px;border:1px solid #2a1d3a;
+ box-shadow:0 10px 40px rgba(0,229,255,.15);display:block;background:#0a0710}
+.two{max-width:1040px;margin:18px auto 0;padding:0 18px;display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.three{max-width:1180px;margin:18px auto 0;padding:0 18px;display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.cell{background:var(--card);border:1px solid #2a1d3a;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cell video{width:100%;display:block;background:#0a0710}
+.cell .cap{padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cell .cap b{font-family:'Orbitron';font-weight:700;font-size:13px;color:#fff;letter-spacing:.04em}
+.note{max-width:1040px;margin:10px auto 0;padding:0 20px;color:#8d83a3;font-size:13px;line-height:1.6}
+.badge{font-family:'Orbitron';font-weight:900;font-size:11px;padding:3px 9px;border-radius:8px;
+ border:1.5px solid var(--cyan);color:var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.25);white-space:nowrap}
+.badge.pk{border-color:var(--pink);color:var(--pink);box-shadow:0 0 12px rgba(255,45,134,.25)}
+.chip{display:inline-block;font-family:'Orbitron';font-weight:700;font-size:11px;padding:3px 10px;border-radius:8px;
+ border:1.5px solid var(--cyan);color:var(--cyan);margin:0 6px 6px 0}
+.chip.pk{border-color:var(--pink);color:var(--pink)}
+footer{text-align:center;color:#6a5d7e;margin-top:56px;font-size:12px;letter-spacing:.1em}
+</style></head><body>
+<div class="scan"></div>
+<header>
+ <div class="brand">Cyber<i>Love</i></div>
+ <div class="tag">POMODORO No.001 — TEST v2 / リテイク反映</div>
+ <p class="lead"><b>KEIの指示ぜんぶ反映したよ！</b>全部“緑背景”でキーイング前提。スキャンライン消した／FOCUSを数字の上へ／ゲージ短く＋ビョーン起動／0→25チャージ→5秒静止→カウント開始／コマンド文字復活／字幕は真ん中デカく英＋中サブで3パターン。番号で感想ちょうだい。— リン</p>
+</header>
+
+<h2>① 25分タイマー（シンプル vs リッチ＝比較用）<small>角枠なし・テキスト主体。FOCUSを数字の上に。ゲージ30%短く＋左から“ビョーン”。0:00→25:00チャージ→25:00で5秒静止→そこから24:59…カウント開始。シンプル派とのことだけど、リッチ（ガラス／ネオン管グロー）も並べたよ。どっちがいい？</small></h2>
+<div class="two">
+ <div class="cell"><video src="timer25_simple.mp4" autoplay loop muted playsinline></video><div class="cap"><b>A — SIMPLE</b><span class="badge cy">ミニマル</span></div></div>
+ <div class="cell"><video src="timer25_rich.mp4" autoplay loop muted playsinline></video><div class="cap"><b>B — RICH</b><span class="badge pk">ネオン管</span></div></div>
+</div>
+<p class="note">※テストは最初の約12秒。本番はこの動きのまま25分フル尺＋5分版、セッション01〜04分を作るよ。</p>
+
+<h2>② コマンド文字（左上・コード風）<small>前のK-POMODOROの置き換え。`kei@pomodoro:~$ focus --25min --session 01 / 04` をプログラミングコード風にカタカタ。3:4動画の左上に置く想定（サイズは合わせて調整するね）。</small></h2>
+<div class="herovid"><video src="cmdline_test.mp4" autoplay loop muted playsinline></video></div>
+<p class="note"><span class="chip">緑背景</span><span class="chip">左上HUD</span> session番号は01〜04で差し替え。大きさ・位置はKEIの3:4フレームに合わせて微調整できる。</p>
+
+<h2>③ 字幕 3パターン（真ん中にデカく・英メイン＋中サブ）<small>真ん中に英語メイン大→下に中国語サブ。1個ずつ出る→消える→次。締めは「辛苦了」。下記3つから選んで（or 組み合わせ）。選んだやつはThree.jsでさらに高級に作り込むよ。</small></h2>
+<div class="three">
+ <div class="cell"><video src="sub_matrix.mp4" autoplay loop muted playsinline></video><div class="cap"><b>A — MATRIX</b><span class="badge cy">ランダム文字→収束</span></div></div>
+ <div class="cell"><video src="sub_type.mp4" autoplay loop muted playsinline></video><div class="cap"><b>B — TYPING</b><span class="badge cy">1字ずつ＋カーソル</span></div></div>
+ <div class="cell"><video src="sub_glitch.mp4" autoplay loop muted playsinline></video><div class="cap"><b>C — GLITCH/NEON</b><span class="badge pk">RGB分離＋ネオン</span></div></div>
+</div>
+<p class="note">※今は確実に動くcanvas版。KEIが「これ」って決めたら、そのパターンをThree.jsでプロ仕上げに格上げする（時間かけてOKって言ってたやつ）。</p>
+
+<h2>④ 勉強シルエット（前回の静止画・参考）<small>白いマネキンが勉強してるやつ。これはOKなら後でGrok（KEIの契約内）で動かす。</small></h2>
+<div class="herovid"><img src="img/silhouette_study.png" alt="study silhouette"></div>
+
+<footer>CyberLove · pomodoro No.001 · test v2 · リン</footer>
+</body></html>
