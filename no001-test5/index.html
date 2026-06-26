@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberLove — ポモドーロ No.001 テスト5（HUD）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Zen+Dots&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff2d86;--cyan:#00e5ff;--bg:#06040b;--card:#100a18}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(120% 80% at 50% -10%,#1a0e26,#06040b 60%);color:#eee;font-family:'Rajdhani','Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 80px}
+header{text-align:center;padding:42px 18px 26px}
+.brand{font-family:'Zen Dots';font-size:clamp(26px,7vw,46px);color:#fff;letter-spacing:.02em;text-shadow:0 0 22px rgba(255,45,134,.8)}
+.brand i{color:var(--pink);font-style:normal}
+.tag{font-family:'Orbitron';font-weight:700;letter-spacing:.3em;color:var(--cyan);margin-top:10px;font-size:clamp(11px,3vw,15px);text-shadow:0 0 12px rgba(0,229,255,.8)}
+.lead{max-width:780px;margin:18px auto 0;padding:0 18px;color:#cfc8da;line-height:1.7;font-size:15px}
+.lead b{color:#fff}
+h2{font-family:'Orbitron';font-weight:900;font-size:clamp(16px,4.4vw,22px);color:#fff;margin:52px auto 4px;max-width:1040px;padding:0 18px;letter-spacing:.05em}
+h2 small{font-family:'Rajdhani';font-weight:600;color:#9a8fb0;display:block;font-size:14px;margin-top:6px;line-height:1.6}
+.herovid{max-width:900px;margin:18px auto 0;padding:0 18px}
+.herovid video{width:100%;border-radius:14px;border:1px solid #2a1d3a;box-shadow:0 10px 40px rgba(0,229,255,.15);display:block;background:#0a0710}
+.four{max-width:1180px;margin:18px auto 0;padding:0 18px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.cell{background:var(--card);border:1px solid #2a1d3a;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cell video{width:100%;display:block;background:#0a0710}
+.cell .cap{padding:10px 13px;display:flex;justify-content:space-between;align-items:center}
+.cell .cap b{font-family:'Orbitron';font-weight:700;font-size:12px;color:#fff;letter-spacing:.04em}
+.note{max-width:1040px;margin:10px auto 0;padding:0 20px;color:#8d83a3;font-size:13px;line-height:1.6}
+.note a{color:var(--cyan)}
+.badge{font-family:'Orbitron';font-weight:900;font-size:11px;padding:3px 9px;border-radius:8px;border:1.5px solid var(--cyan);color:var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.25);white-space:nowrap}
+.chip{display:inline-block;font-family:'Orbitron';font-weight:700;font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--cyan);color:var(--cyan);margin:0 6px 6px 0}
+.chip.pk{border-color:var(--pink);color:var(--pink)}
+.chip.wip{border-color:#caa14a;color:#e6c477}
+footer{text-align:center;color:#6a5d7e;margin-top:56px;font-size:12px;letter-spacing:.1em}
+</style></head><body>
+<header>
+ <div class="brand">Cyber<i>Love</i></div>
+ <div class="tag">POMODORO No.001 — TEST v5 / HUD</div>
+ <p class="lead"><b>HUD方向にしてみたよ！</b>① タイマーに四隅ブラケット＋データ表示でHUD感（時計は主役のまま控えめ）／目盛りは節目だけ ② コマンド文字のカーソルは5回点滅で消える ③ 字幕の“消える”を2倍速に。気に入らなければ前のシンプル版(<a href="../no001-test4/">v4</a>)にすぐ戻せるよ。— リン</p>
+</header>
+
+<h2>① 25分タイマー（HUDリッチ版）<small>四隅のブラケット・「POMODORO.SYS // FOCUS」表示・RECドット・スキャン線でHUD感。でも時計が主役のまま控えめに。ゲージの目盛りは節目（1/4ごと）だけに削減。水色の液体が0→MAXに溜まる。※サンプルは25分を早送り再生。</small></h2>
+<div class="herovid"><video src="timer25_hud.mp4" autoplay loop muted playsinline></video></div>
+<p class="note"><span class="chip">HUD</span><span class="chip">節目だけ目盛り</span><span class="chip wip">本物のサイバー液体AI動画をゲージ内に合成→生成中</span> ／ シンプルに戻したい時は <a href="../no001-test4/">v4(シンプル版)</a> へ。最悪“ただ白いゲージ”案もアリ。</p>
+
+<h2>② コマンド文字 01〜04（カーソル修正）<small>打ち終わったあとのカーソルは5回くらい点滅して消えるようにした（ずっとチカチカしない）。色は白。</small></h2>
+<div class="four">
+ <div class="cell"><video src="cmdline_s01.mp4" autoplay loop muted playsinline></video><div class="cap"><b>SESSION 01</b><span class="badge">1/4</span></div></div>
+ <div class="cell"><video src="cmdline_s02.mp4" autoplay loop muted playsinline></video><div class="cap"><b>SESSION 02</b><span class="badge">2/4</span></div></div>
+ <div class="cell"><video src="cmdline_s03.mp4" autoplay loop muted playsinline></video><div class="cap"><b>SESSION 03</b><span class="badge">3/4</span></div></div>
+ <div class="cell"><video src="cmdline_s04.mp4" autoplay loop muted playsinline></video><div class="cap"><b>SESSION 04</b><span class="badge">4/4</span></div></div>
+</div>
+
+<h2>③ 字幕（消えるの2倍速）<small>出るスピードは据え置き、消える（右→左デリート）を2倍速くしてサッと消えるように。カーソル白・文言自然化はそのまま。</small></h2>
+<div class="herovid"><video src="sub_bc.mp4" autoplay loop muted playsinline></video></div>
+<p class="note"><span class="chip pk">サッと消える</span><span class="chip">出るのは据え置き</span></p>
+
+<footer>CyberLove · pomodoro No.001 · test v5 · リン</footer>
+</body></html>
