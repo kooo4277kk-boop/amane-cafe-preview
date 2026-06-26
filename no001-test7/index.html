@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberLove — ポモドーロ No.001 テスト7（ゲージ4案）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Zen+Dots&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff2d86;--cyan:#00e5ff;--bg:#06040b;--card:#100a18}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(120% 80% at 50% -10%,#1a0e26,#06040b 60%);color:#eee;font-family:'Rajdhani','Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 80px}
+header{text-align:center;padding:42px 18px 26px}
+.brand{font-family:'Zen Dots';font-size:clamp(26px,7vw,46px);color:#fff;letter-spacing:.02em;text-shadow:0 0 22px rgba(255,45,134,.8)}
+.brand i{color:var(--pink);font-style:normal}
+.tag{font-family:'Orbitron';font-weight:700;letter-spacing:.3em;color:var(--cyan);margin-top:10px;font-size:clamp(11px,3vw,15px);text-shadow:0 0 12px rgba(0,229,255,.8)}
+.lead{max-width:780px;margin:18px auto 0;padding:0 18px;color:#cfc8da;line-height:1.7;font-size:15px}
+.lead b{color:#fff}
+h2{font-family:'Orbitron';font-weight:900;font-size:clamp(16px,4.4vw,22px);color:#fff;margin:46px auto 4px;max-width:1040px;padding:0 18px;letter-spacing:.05em}
+.two{max-width:1180px;margin:18px auto 0;padding:0 18px;display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.cell{background:var(--card);border:1px solid #2a1d3a;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cell video{width:100%;display:block;background:#0a0710}
+.cell .cap{padding:12px 14px}
+.cell .cap b{font-family:'Orbitron';font-weight:700;font-size:14px;color:#fff;letter-spacing:.04em;display:block}
+.cell .cap span{font-family:'Rajdhani';font-weight:600;color:#9a8fb0;font-size:13px}
+.note{max-width:1040px;margin:18px auto 0;padding:0 20px;color:#8d83a3;font-size:13px;line-height:1.6}
+.note a{color:var(--cyan)}
+footer{text-align:center;color:#6a5d7e;margin-top:56px;font-size:12px;letter-spacing:.1em}
+</style></head><body>
+<header>
+ <div class="brand">Cyber<i>Love</i></div>
+ <div class="tag">POMODORO No.001 — TEST v7 / ゲージ4案</div>
+ <p class="lead"><b>HUD枠やめて、白＋うっすら水色グロウでシンプルにしたよ。</b>タイマーは【数字＋STANDBY/FOCUS＋ゲージ】だけ。ゆっくり光る程度で控えめに。ゲージのデザインを4案つくったから、どれがいいか番号で教えて（混ぜてもOK）。AI液体は不評だったのでナシにした。— リン</p>
+</header>
+
+<h2>25分タイマー — ゲージ4案（白＋水色グロウ）</h2>
+<div class="two">
+ <div class="cell"><video src="gauge_plain.mp4" autoplay loop muted playsinline></video><div class="cap"><b>A — シンプル</b><span>プレーンな白バー。いちばん素直で見やすい</span></div></div>
+ <div class="cell"><video src="gauge_hud.mp4" autoplay loop muted playsinline></video><div class="cap"><b>B — シンプルHUD</b><span>四角フレーム＋節目の区切り。ちょいサイバー</span></div></div>
+ <div class="cell"><video src="gauge_liquid.mp4" autoplay loop muted playsinline></video><div class="cap"><b>C — リキッド</b><span>液面が波打つ。白い液体っぽく</span></div></div>
+ <div class="cell"><video src="gauge_bubble.mp4" autoplay loop muted playsinline></video><div class="cap"><b>D — 泡（バブル）</b><span>中で小さい泡がふわっと昇る</span></div></div>
+</div>
+<p class="note">※サンプルは25分を早送り再生（本番は実時間）／全部 緑背景・ゆっくり光る控えめ仕様。<br>② コマンド文字01〜04 と ③ 字幕はOKもらったので据え置き（<a href="../no001-test6/">v6で確認可</a>）。番号でゲージを選んでくれたら、それで本番フル尺に進むよ。</p>
+
+<footer>CyberLove · pomodoro No.001 · test v7 · リン</footer>
+</body></html>
